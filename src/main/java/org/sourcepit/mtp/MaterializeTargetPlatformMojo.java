@@ -6,24 +6,35 @@
 
 package org.sourcepit.mtp;
 
+import static org.sourcepit.common.utils.io.IOResources.buffIn;
+import static org.sourcepit.common.utils.io.IOResources.fileIn;
+import static org.sourcepit.common.utils.io.IOResources.fileOut;
+import static org.sourcepit.common.utils.io.IOResources.zipOut;
+
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.util.Collection;
 import java.util.List;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 import javax.inject.Inject;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.project.MavenProject;
+import org.sourcepit.common.utils.file.FileVisitor;
+import org.sourcepit.common.utils.io.IOOperation;
 import org.sourcepit.common.utils.lang.Exceptions;
+import org.sourcepit.common.utils.path.PathUtils;
 import org.sourcepit.guplex.Guplex;
 import org.sourcepit.mtp.ee.ExecutionEnvironmentSelector;
 import org.sourcepit.mtp.resolver.TargetPlatformResolver;
-import org.sourcepit.mtp.te.TargetEnvironment;
-import org.sourcepit.mtp.te.TargetEnvironmentSelector;
 
 /**
  * @goal materialize-target-platform
@@ -55,9 +66,6 @@ public class MaterializeTargetPlatformMojo extends AbstractMojo
    @Inject
    private ExecutionEnvironmentSelector eeSelector;
 
-   @Inject
-   private TargetEnvironmentSelector teSelector;
-
    public final void execute() throws MojoExecutionException, MojoFailureException
    {
       guplex.inject(this, true);
@@ -68,25 +76,128 @@ public class MaterializeTargetPlatformMojo extends AbstractMojo
    {
       final File platformDir = getCleanPlatformDir();
 
-      final CopyTargetPlatformHandler handler = new CopyTargetPlatformHandler(platformDir);
+      final CopyTargetPlatformResolutionHandler resolutionHandler = new CopyTargetPlatformResolutionHandler(platformDir);
+      resolve(resolutionHandler);
 
+      final String executionEnvironment = eeSelector.select(resolutionHandler.getExecutionEnvironments());
+
+      writeDefinitions(platformDir, executionEnvironment, resolutionHandler.getTargetEnvironments());
+
+      pack(platformDir, getPlatformZipFile(), getFinalName());
+   }
+
+   private void pack(final File platformDir, File platformZipFile, final String pathPrefix)
+   {
+      new IOOperation<ZipOutputStream>(zipOut(fileOut(platformZipFile, true)))
+      {
+         @Override
+         protected void run(final ZipOutputStream zipOut) throws IOException
+         {
+            org.sourcepit.common.utils.file.FileUtils.accept(platformDir, new FileVisitor()
+            {
+               public boolean visit(File file)
+               {
+                  if (!file.equals(platformDir))
+                  {
+                     try
+                     {
+                        String path = PathUtils.getRelativePath(file, platformDir, "/");
+                        if (pathPrefix != null)
+                        {
+                           path = pathPrefix + "/" + path;
+                        }
+                        pack(zipOut, file, path);
+                     }
+                     catch (IOException e)
+                     {
+                        throw Exceptions.pipe(e);
+                     }
+                  }
+                  return true;
+               }
+
+               private void pack(final ZipOutputStream zipOut, File file, final String path) throws IOException
+               {
+                  if (file.isDirectory())
+                  {
+                     ZipEntry entry = new ZipEntry(path + "/");
+                     zipOut.putNextEntry(entry);
+                     zipOut.closeEntry();
+                  }
+                  else
+                  {
+                     ZipEntry entry = new ZipEntry(path);
+                     entry.setSize(file.length());
+                     zipOut.putNextEntry(entry);
+                     new IOOperation<InputStream>(buffIn(fileIn(file)))
+                     {
+                        @Override
+                        protected void run(InputStream openFile) throws IOException
+                        {
+                           IOUtils.copy(openFile, zipOut);
+                        }
+                     }.run();
+                     zipOut.closeEntry();
+                  }
+               }
+            });
+         }
+      }.run();
+   }
+
+   private void writeDefinitions(File platformDir, String executionEnvironment,
+      Collection<TargetEnvironment> targetEnvironments)
+   {
+      for (TargetEnvironment targetEnvironment : targetEnvironments)
+      {
+         final StringBuilder sb = new StringBuilder();
+         sb.append(name);
+         sb.append('-');
+         sb.append(targetEnvironment.getOs());
+         sb.append('-');
+         sb.append(targetEnvironment.getWs());
+         sb.append('-');
+         sb.append(targetEnvironment.getArch());
+         if (targetEnvironment.getNl() != null)
+         {
+            sb.append('-');
+            sb.append(targetEnvironment.getNl());
+         }
+
+         final String platformName = sb.toString();
+
+         sb.append(".target");
+
+         final File targetFile = new File(platformDir, sb.toString());
+
+         String relativePath = PathUtils.getRelativePath(targetFile.getParentFile(), platformDir, "/");
+         if (relativePath == null || relativePath.length() == 0)
+         {
+            relativePath = ".";
+         }
+
+         new TargetPlatformWriter().write(targetFile, platformName, relativePath, targetEnvironment,
+            executionEnvironment);
+      }
+   }
+
+   private void resolve(final CopyTargetPlatformResolutionHandler handler)
+   {
       final List<MavenProject> projects = session.getProjects();
       for (MavenProject project : projects)
       {
          tpResolver.resolveTargetPlatform(session, project, handler);
       }
+   }
 
-      final TargetEnvironment selectedTE = teSelector.select(handler.getTargetEnvironments());
-
-      final String selectedEE = eeSelector.select(handler.getExecutionEnvironments());
-
-      final File targetFile = new File(platformDir, name + ".target");
-      new TargetPlatformWriter().write(targetFile, name, platformDir, selectedTE, selectedEE);
+   private File getPlatformZipFile()
+   {
+      return new File(targetDir, getFinalName() + ".zip");
    }
 
    private File getCleanPlatformDir()
    {
-      final File platformDir = new File(targetDir, "target-platform");
+      final File platformDir = getPlatformDir();
       if (platformDir.exists())
       {
          try
@@ -99,5 +210,15 @@ public class MaterializeTargetPlatformMojo extends AbstractMojo
          }
       }
       return platformDir;
+   }
+
+   private File getPlatformDir()
+   {
+      return new File(targetDir, "target-platform");
+   }
+
+   private String getFinalName()
+   {
+      return "target-platform-" + session.getCurrentProject().getVersion() + "-target";
    }
 }

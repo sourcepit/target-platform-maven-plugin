@@ -9,14 +9,13 @@ package org.sourcepit.mtp;
 import java.io.File;
 
 import org.sourcepit.common.utils.xml.XmlUtils;
-import org.sourcepit.mtp.te.TargetEnvironment;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.ProcessingInstruction;
 
 public class TargetPlatformWriter
 {
-   public void write(File targetFile, String name, File location, TargetEnvironment targetEnvironment,
+   public void write(File targetFile, String name, String location, TargetEnvironment targetEnvironment,
       String executionEnvironment)
    {
       final Document doc = XmlUtils.newDocument();
@@ -41,7 +40,7 @@ public class TargetPlatformWriter
       targetElem.appendChild(locationsElem);
 
       Element locationElem = doc.createElement("location");
-      locationElem.setAttribute("path", location.getAbsolutePath());
+      locationElem.setAttribute("path", location);
       locationElem.setAttribute("type", "Profile");
       locationsElem.appendChild(locationElem);
 

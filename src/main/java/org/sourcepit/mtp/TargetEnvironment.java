@@ -4,7 +4,7 @@
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
 
-package org.sourcepit.mtp.te;
+package org.sourcepit.mtp;
 
 import javax.validation.constraints.NotNull;
 

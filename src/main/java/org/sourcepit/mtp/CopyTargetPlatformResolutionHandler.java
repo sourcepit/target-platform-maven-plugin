@@ -19,9 +19,8 @@ import org.sourcepit.common.utils.lang.Exceptions;
 import org.sourcepit.common.utils.zip.ZipProcessingRequest;
 import org.sourcepit.common.utils.zip.ZipProcessor;
 import org.sourcepit.mtp.resolver.TargetPlatformResolutionHandler;
-import org.sourcepit.mtp.te.TargetEnvironment;
 
-public class CopyTargetPlatformHandler implements TargetPlatformResolutionHandler
+public class CopyTargetPlatformResolutionHandler implements TargetPlatformResolutionHandler
 {
    private final Collection<String> executionEnvironments = new LinkedHashSet<String>();
    private final Collection<TargetEnvironment> targetEnvironments = new LinkedHashSet<TargetEnvironment>();
@@ -30,7 +29,7 @@ public class CopyTargetPlatformHandler implements TargetPlatformResolutionHandle
    private final File featuresDir;
    private final File pluginsDir;
 
-   public CopyTargetPlatformHandler(File targetDir)
+   public CopyTargetPlatformResolutionHandler(File targetDir)
    {
       this.platformDir = targetDir;
       featuresDir = new File(targetDir, "features");
