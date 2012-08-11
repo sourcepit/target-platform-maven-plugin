@@ -64,6 +64,38 @@ public class MtpIT extends ExternalMavenTest
    }
 
    @Test
+   public void testReactorTychoModeMaven() throws Exception
+   {
+      final String projectVersion = getEnvironment().getProperty("project.version");
+      final File projectDir = getResource("tycho-reactor");
+      build(projectDir, "-Dtycho.mode=maven", "-e", "-B", "clean",
+         "org.sourcepit:materialize-target-platform-maven-plugin:" + projectVersion + ":materialize-target-platform");
+
+      final File platformDir = new File(projectDir, "target/target-platform");
+      assertTrue(platformDir.exists());
+
+      final File featuresDir = new File(platformDir, "features");
+      assertTrue(featuresDir.exists());
+
+      final File pluginsDir = new File(platformDir, "plugins");
+      assertTrue(pluginsDir.exists());
+
+      // org.eclipse.pde is contributed via the org.sourcepit.mtp.feature
+      File[] pdeFeatures = collectFiles(featuresDir, "org.eclipse.pde");
+      assertThat(pdeFeatures.length, is(1));
+
+      // org.eclipse.osgi unpacked due to Tycho test mojo configuration
+      File[] osgiPlugins = collectFiles(pluginsDir, "org.eclipse.osgi_");
+      assertThat(osgiPlugins.length, is(1));
+      assertThat(osgiPlugins[0].isDirectory(), is(true));
+
+      // org.junit is not unpacked due to unpack flag in org.eclipse.jdt feature.xml
+      File[] junitPlugins = collectFiles(pluginsDir, "org.junit_4");
+      assertThat(junitPlugins.length, is(1));
+      assertThat(junitPlugins[0].isDirectory(), is(true));
+   }
+
+   @Test
    public void testTestPlugin() throws Exception
    {
       final String projectVersion = getEnvironment().getProperty("project.version");

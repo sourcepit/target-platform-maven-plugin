@@ -40,6 +40,7 @@ import org.eclipse.tycho.core.DependencyResolverConfiguration;
 import org.eclipse.tycho.core.TargetEnvironment;
 import org.eclipse.tycho.core.TargetPlatformConfiguration;
 import org.eclipse.tycho.core.TargetPlatformResolver;
+import org.eclipse.tycho.core.TychoConstants;
 import org.eclipse.tycho.core.TychoProject;
 import org.eclipse.tycho.core.osgitools.BundleReader;
 import org.eclipse.tycho.core.osgitools.DefaultReactorProject;
@@ -47,6 +48,7 @@ import org.eclipse.tycho.core.osgitools.OsgiManifest;
 import org.eclipse.tycho.core.resolver.DefaultTargetPlatformResolverFactory;
 import org.eclipse.tycho.core.resolver.shared.OptionalResolutionAction;
 import org.eclipse.tycho.core.utils.TychoProjectUtils;
+import org.eclipse.tycho.resolver.TychoDependencyResolver;
 import org.sourcepit.common.utils.io.IOOperation;
 import org.sourcepit.common.utils.xml.XmlUtils;
 import org.sourcepit.mtp.resolver.TargetPlatformResolutionHandler;
@@ -72,6 +74,9 @@ public class TychoTargetPlatformResolver implements org.sourcepit.mtp.resolver.T
    @Inject
    private BundleReader bundleReader;
 
+   @Inject
+   private TychoDependencyResolver resolver;
+
    /**
     * {@inheritDoc}
     */
@@ -85,7 +90,7 @@ public class TychoTargetPlatformResolver implements org.sourcepit.mtp.resolver.T
       final List<Dependency> dependencies = new ArrayList<Dependency>();
       final Set<String> explodedBundles = new HashSet<String>();
 
-      final TargetPlatformConfiguration configuration = TychoProjectUtils.getTargetPlatformConfiguration(project);
+      final TargetPlatformConfiguration configuration = getTargetPlatformConfiguration(session, project);
 
       for (TargetEnvironment te : configuration.getEnvironments())
       {
@@ -184,6 +189,23 @@ public class TychoTargetPlatformResolver implements org.sourcepit.mtp.resolver.T
          final List<File> frameworkExtensions = getFrameworkExtensions(session, project,
             surefirePluginConfiguration.getFrameworkExtensions());
          processFrameworkExtensions(explodedBundles, frameworkExtensions, handler);
+      }
+   }
+
+   private TargetPlatformConfiguration getTargetPlatformConfiguration(MavenSession session, MavenProject project)
+   {
+      setupProjectLazy(session, project);
+      return TychoProjectUtils.getTargetPlatformConfiguration(project);
+   }
+
+   private void setupProjectLazy(MavenSession session, MavenProject project)
+   {
+      final TargetPlatformConfiguration targetPlatformConfiguration = (TargetPlatformConfiguration) project
+         .getContextValue(TychoConstants.CTX_TARGET_PLATFORM_CONFIGURATION);
+      if (targetPlatformConfiguration == null)
+      {
+         // project was not set up by Tycho. Maybe running in -Dtycho.mode=maven
+         resolver.setupProject(session, project, DefaultReactorProject.adapt(project));
       }
    }
 
