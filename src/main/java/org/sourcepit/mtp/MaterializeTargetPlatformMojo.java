@@ -6,30 +6,17 @@
 
 package org.sourcepit.mtp;
 
-import static org.sourcepit.common.utils.io.IOResources.buffIn;
-import static org.sourcepit.common.utils.io.IOResources.fileIn;
-import static org.sourcepit.common.utils.io.IOResources.fileOut;
-import static org.sourcepit.common.utils.io.IOResources.zipOut;
-
 import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.Collection;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
 
 import javax.inject.Inject;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.project.MavenProject;
 import org.slf4j.Logger;
-import org.sourcepit.common.utils.file.FileVisitor;
-import org.sourcepit.common.utils.io.IOOperation;
-import org.sourcepit.common.utils.lang.Exceptions;
 import org.sourcepit.common.utils.path.PathUtils;
 import org.sourcepit.guplex.Guplex;
 import org.sourcepit.mtp.change.TargetPlatformConfigurationChangeDiscoverer;
@@ -92,66 +79,7 @@ public class MaterializeTargetPlatformMojo extends AbstractMojo
 
       writeDefinitions(platformDir, executionEnvironment, resolutionHandler.getTargetEnvironments());
 
-      pack(platformDir, getPlatformZipFile(), getFinalName());
-   }
-
-   private void pack(final File platformDir, File platformZipFile, final String pathPrefix)
-   {
-      new IOOperation<ZipOutputStream>(zipOut(fileOut(platformZipFile, true)))
-      {
-         @Override
-         protected void run(final ZipOutputStream zipOut) throws IOException
-         {
-            org.sourcepit.common.utils.file.FileUtils.accept(platformDir, new FileVisitor()
-            {
-               public boolean visit(File file)
-               {
-                  if (!file.equals(platformDir))
-                  {
-                     try
-                     {
-                        String path = PathUtils.getRelativePath(file, platformDir, "/");
-                        if (pathPrefix != null)
-                        {
-                           path = pathPrefix + "/" + path;
-                        }
-                        pack(zipOut, file, path);
-                     }
-                     catch (IOException e)
-                     {
-                        throw Exceptions.pipe(e);
-                     }
-                  }
-                  return true;
-               }
-
-               private void pack(final ZipOutputStream zipOut, File file, final String path) throws IOException
-               {
-                  if (file.isDirectory())
-                  {
-                     ZipEntry entry = new ZipEntry(path + "/");
-                     zipOut.putNextEntry(entry);
-                     zipOut.closeEntry();
-                  }
-                  else
-                  {
-                     ZipEntry entry = new ZipEntry(path);
-                     entry.setSize(file.length());
-                     zipOut.putNextEntry(entry);
-                     new IOOperation<InputStream>(buffIn(fileIn(file)))
-                     {
-                        @Override
-                        protected void run(InputStream openFile) throws IOException
-                        {
-                           IOUtils.copy(openFile, zipOut);
-                        }
-                     }.run();
-                     zipOut.closeEntry();
-                  }
-               }
-            });
-         }
-      }.run();
+      new SimpleZipper().zip(platformDir, getPlatformZipFile(), getFinalName());
    }
 
    private void writeDefinitions(File platformDir, String executionEnvironment,
@@ -159,25 +87,9 @@ public class MaterializeTargetPlatformMojo extends AbstractMojo
    {
       for (TargetEnvironment targetEnvironment : targetEnvironments)
       {
-         final StringBuilder sb = new StringBuilder();
-         sb.append(name);
-         sb.append('-');
-         sb.append(targetEnvironment.getOs());
-         sb.append('-');
-         sb.append(targetEnvironment.getWs());
-         sb.append('-');
-         sb.append(targetEnvironment.getArch());
-         if (targetEnvironment.getNl() != null)
-         {
-            sb.append('-');
-            sb.append(targetEnvironment.getNl());
-         }
+         final String platformName = getTargetPlatformDefinitionName(targetEnvironment);
 
-         final String platformName = sb.toString();
-
-         sb.append(".target");
-
-         final File targetFile = new File(platformDir, sb.toString());
+         final File targetFile = new File(platformDir, platformName + ".target");
 
          String relativePath = PathUtils.getRelativePath(targetFile.getParentFile(), platformDir, "/");
          if (relativePath == null || relativePath.length() == 0)
@@ -188,6 +100,24 @@ public class MaterializeTargetPlatformMojo extends AbstractMojo
          new TargetPlatformWriter().write(targetFile, platformName, relativePath, targetEnvironment,
             executionEnvironment);
       }
+   }
+
+   private String getTargetPlatformDefinitionName(TargetEnvironment targetEnvironment)
+   {
+      final StringBuilder sb = new StringBuilder();
+      sb.append(name);
+      sb.append('-');
+      sb.append(targetEnvironment.getOs());
+      sb.append('-');
+      sb.append(targetEnvironment.getWs());
+      sb.append('-');
+      sb.append(targetEnvironment.getArch());
+      if (targetEnvironment.getNl() != null)
+      {
+         sb.append('-');
+         sb.append(targetEnvironment.getNl());
+      }
+      return sb.toString();
    }
 
    private void resolve(File metadataDir, final CopyTargetPlatformResolutionHandler handler)
