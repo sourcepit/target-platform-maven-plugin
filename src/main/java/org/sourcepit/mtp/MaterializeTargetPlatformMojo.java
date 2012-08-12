@@ -15,24 +15,24 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collection;
-import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 import javax.inject.Inject;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.project.MavenProject;
+import org.slf4j.Logger;
 import org.sourcepit.common.utils.file.FileVisitor;
 import org.sourcepit.common.utils.io.IOOperation;
 import org.sourcepit.common.utils.lang.Exceptions;
 import org.sourcepit.common.utils.path.PathUtils;
 import org.sourcepit.guplex.Guplex;
+import org.sourcepit.mtp.change.TargetPlatformConfigurationChangeDiscoverer;
 import org.sourcepit.mtp.ee.ExecutionEnvironmentSelector;
 import org.sourcepit.mtp.resolver.TargetPlatformResolver;
 
@@ -57,6 +57,9 @@ public class MaterializeTargetPlatformMojo extends AbstractMojo
     */
    private MavenSession session;
 
+   /** @parameter expression="${mtp.forceResolution}" default-value="false" */
+   private boolean forceResolution;
+
    /** @component */
    private Guplex guplex;
 
@@ -66,6 +69,12 @@ public class MaterializeTargetPlatformMojo extends AbstractMojo
    @Inject
    private ExecutionEnvironmentSelector eeSelector;
 
+   @Inject
+   private TargetPlatformConfigurationChangeDiscoverer changeDiscoverer;
+
+   @Inject
+   private Logger log;
+
    public final void execute() throws MojoExecutionException, MojoFailureException
    {
       guplex.inject(this, true);
@@ -74,10 +83,10 @@ public class MaterializeTargetPlatformMojo extends AbstractMojo
 
    private void doExecute() throws MojoExecutionException, MojoFailureException
    {
-      final File platformDir = getCleanPlatformDir();
+      final File platformDir = getPlatformDir();
 
       final CopyTargetPlatformResolutionHandler resolutionHandler = new CopyTargetPlatformResolutionHandler(platformDir);
-      resolve(resolutionHandler);
+      resolve(new File(platformDir, ".mtp"), resolutionHandler);
 
       final String executionEnvironment = eeSelector.select(resolutionHandler.getExecutionEnvironments());
 
@@ -181,35 +190,47 @@ public class MaterializeTargetPlatformMojo extends AbstractMojo
       }
    }
 
-   private void resolve(final CopyTargetPlatformResolutionHandler handler)
+   private void resolve(File metadataDir, final CopyTargetPlatformResolutionHandler handler)
    {
-      final List<MavenProject> projects = session.getProjects();
-      for (MavenProject project : projects)
+      for (MavenProject project : session.getProjects())
       {
-         tpResolver.resolveTargetPlatform(session, project, handler);
+         if (isResolutionRequired(metadataDir, project))
+         {
+            log.info("Materializing target platform of project " + project.getId());
+            try
+            {
+               tpResolver.resolveTargetPlatform(session, project, handler);
+            }
+            catch (RuntimeException e)
+            {
+               changeDiscoverer.clearTargetPlatformConfigurationStausCache(metadataDir, project);
+               throw e;
+            }
+            catch (Error e)
+            {
+               changeDiscoverer.clearTargetPlatformConfigurationStausCache(metadataDir, project);
+               throw e;
+            }
+         }
+         else
+         {
+            log.info("Target platform of project " + project.getId() + " already materialized and up to date");
+         }
       }
+   }
+
+   private boolean isResolutionRequired(File metadataDir, MavenProject project)
+   {
+      if (changeDiscoverer.hasTargetPlatformConfigurationChanged(metadataDir, project))
+      {
+         return true;
+      }
+      return forceResolution;
    }
 
    private File getPlatformZipFile()
    {
       return new File(targetDir, getFinalName() + ".zip");
-   }
-
-   private File getCleanPlatformDir()
-   {
-      final File platformDir = getPlatformDir();
-      if (platformDir.exists())
-      {
-         try
-         {
-            FileUtils.forceDelete(platformDir);
-         }
-         catch (IOException e)
-         {
-            throw Exceptions.pipe(e);
-         }
-      }
-      return platformDir;
    }
 
    private File getPlatformDir()

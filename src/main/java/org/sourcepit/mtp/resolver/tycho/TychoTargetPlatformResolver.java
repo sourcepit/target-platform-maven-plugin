@@ -77,9 +77,6 @@ public class TychoTargetPlatformResolver implements org.sourcepit.mtp.resolver.T
    @Inject
    private TychoDependencyResolver resolver;
 
-   /**
-    * {@inheritDoc}
-    */
    public void resolveTargetPlatform(MavenSession session, MavenProject project, TargetPlatformResolutionHandler handler)
    {
       if (!(projectTypes.get(project.getPackaging()) instanceof TychoProject))

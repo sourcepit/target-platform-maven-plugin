@@ -7,12 +7,14 @@
 package org.sourcepit.mtp.it;
 
 import static org.hamcrest.core.Is.is;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.FileFilter;
 
+import org.apache.commons.io.FileUtils;
 import org.junit.Test;
 import org.sourcepit.common.maven.testing.ExternalMavenTest;
 import org.sourcepit.common.testing.Environment;
@@ -36,7 +38,7 @@ public class MtpIT extends ExternalMavenTest
    {
       final String projectVersion = getEnvironment().getProperty("project.version");
       final File projectDir = getResource("tycho-reactor");
-      build(projectDir, "-e", "-B", "clean", "org.sourcepit:materialize-target-platform-maven-plugin:" + projectVersion
+      build(projectDir, "-e", "-B", "org.sourcepit:materialize-target-platform-maven-plugin:" + projectVersion
          + ":materialize-target-platform");
 
       final File platformDir = new File(projectDir, "target/target-platform");
@@ -93,6 +95,37 @@ public class MtpIT extends ExternalMavenTest
       File[] junitPlugins = collectFiles(pluginsDir, "org.junit_4");
       assertThat(junitPlugins.length, is(1));
       assertThat(junitPlugins[0].isDirectory(), is(true));
+   }
+
+   @Test
+   public void testTargetPlatformConfigurationNotChanged() throws Exception
+   {
+      testReactorTychoModeMaven();
+
+      final String projectVersion = getEnvironment().getProperty("project.version");
+      final File projectDir = new File(getWs().getRoot(), "tycho-reactor");
+      assertTrue(projectDir.exists());
+
+      final File platformDir = new File(projectDir, "target/target-platform");
+      assertTrue(platformDir.exists());
+
+      final File featuresDir = new File(platformDir, "features");
+      assertTrue(featuresDir.exists());
+
+      final File pluginsDir = new File(platformDir, "plugins");
+      assertTrue(pluginsDir.exists());
+
+      final File metadataDir = new File(platformDir, ".mtp");
+      assertTrue(metadataDir.exists());
+
+      FileUtils.forceDelete(featuresDir);
+      FileUtils.forceDelete(pluginsDir);
+
+      build(projectDir, "-Dtycho.mode=maven", "-e", "-B", "org.sourcepit:materialize-target-platform-maven-plugin:"
+         + projectVersion + ":materialize-target-platform");
+
+      assertFalse(featuresDir.exists());
+      assertFalse(pluginsDir.exists());
    }
 
    @Test
