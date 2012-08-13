@@ -191,8 +191,17 @@ public class TychoTargetPlatformResolver implements org.sourcepit.tpmp.resolver.
 
    private TargetPlatformConfiguration getTargetPlatformConfiguration(MavenSession session, MavenProject project)
    {
-      setupProjectLazy(session, project);
+      setupSessionLazy(session);
       return TychoProjectUtils.getTargetPlatformConfiguration(project);
+   }
+
+   private void setupSessionLazy(MavenSession session)
+   {
+      List<MavenProject> projects = session.getProjects();
+      for (MavenProject project : projects)
+      {
+         setupProjectLazy(session, project);
+      }
    }
 
    private void setupProjectLazy(MavenSession session, MavenProject project)
