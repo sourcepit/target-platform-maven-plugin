@@ -4,7 +4,7 @@
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
 
-package org.sourcepit.mtp.ee;
+package org.sourcepit.tpmp.ee;
 
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.hamcrest.core.IsNull.nullValue;
@@ -20,6 +20,7 @@ import javax.validation.ConstraintViolationException;
 
 import org.junit.Test;
 import org.sourcepit.guplex.test.GuplexTest;
+import org.sourcepit.tpmp.ee.DefaultExecutionEnvironmentSelector;
 
 public class OsgifyExecutionEnvironmentSelectorTest extends GuplexTest
 {

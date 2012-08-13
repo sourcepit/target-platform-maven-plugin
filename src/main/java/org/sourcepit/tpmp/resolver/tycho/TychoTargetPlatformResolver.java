@@ -4,7 +4,7 @@
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
 
-package org.sourcepit.mtp.resolver.tycho;
+package org.sourcepit.tpmp.resolver.tycho;
 
 import static org.sourcepit.common.utils.io.IOResources.osgiIn;
 
@@ -51,13 +51,13 @@ import org.eclipse.tycho.core.utils.TychoProjectUtils;
 import org.eclipse.tycho.resolver.TychoDependencyResolver;
 import org.sourcepit.common.utils.io.IOOperation;
 import org.sourcepit.common.utils.xml.XmlUtils;
-import org.sourcepit.mtp.resolver.TargetPlatformResolutionHandler;
+import org.sourcepit.tpmp.resolver.TargetPlatformResolutionHandler;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
 @Named
-public class TychoTargetPlatformResolver implements org.sourcepit.mtp.resolver.TargetPlatformResolver
+public class TychoTargetPlatformResolver implements org.sourcepit.tpmp.resolver.TargetPlatformResolver
 {
    @Inject
    private Map<String, TychoProject> projectTypes;

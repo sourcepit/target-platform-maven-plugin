@@ -9,7 +9,7 @@
 		<relativePath>../srcpit-parent</relativePath>
 	</parent>
 
-	<artifactId>materialize-target-platform-maven-plugin</artifactId>
+	<artifactId>target-platform-maven-plugin</artifactId>
 	<version>0.1.0-SNAPSHOT</version>
 	<packaging>maven-plugin</packaging>
 

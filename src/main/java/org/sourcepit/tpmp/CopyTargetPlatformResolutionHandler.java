@@ -4,7 +4,7 @@
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
 
-package org.sourcepit.mtp;
+package org.sourcepit.tpmp;
 
 import java.io.File;
 import java.io.IOException;
@@ -18,7 +18,7 @@ import org.apache.maven.project.MavenProject;
 import org.sourcepit.common.utils.lang.Exceptions;
 import org.sourcepit.common.utils.zip.ZipProcessingRequest;
 import org.sourcepit.common.utils.zip.ZipProcessor;
-import org.sourcepit.mtp.resolver.TargetPlatformResolutionHandler;
+import org.sourcepit.tpmp.resolver.TargetPlatformResolutionHandler;
 
 public class CopyTargetPlatformResolutionHandler implements TargetPlatformResolutionHandler
 {

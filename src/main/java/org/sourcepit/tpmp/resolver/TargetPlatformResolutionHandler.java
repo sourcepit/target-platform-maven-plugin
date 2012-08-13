@@ -4,7 +4,7 @@
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
 
-package org.sourcepit.mtp.resolver;
+package org.sourcepit.tpmp.resolver;
 
 import java.io.File;
 

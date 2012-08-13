@@ -4,7 +4,7 @@
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
 
-package org.sourcepit.mtp;
+package org.sourcepit.tpmp;
 
 import java.io.File;
 import java.io.IOException;
@@ -31,9 +31,9 @@ import org.sourcepit.common.utils.path.PathUtils;
 import org.sourcepit.common.utils.zip.ZipProcessingRequest;
 import org.sourcepit.common.utils.zip.ZipProcessor;
 import org.sourcepit.guplex.Guplex;
-import org.sourcepit.mtp.change.TargetPlatformConfigurationChangeDiscoverer;
-import org.sourcepit.mtp.ee.ExecutionEnvironmentSelector;
-import org.sourcepit.mtp.resolver.TargetPlatformResolver;
+import org.sourcepit.tpmp.change.TargetPlatformConfigurationChangeDiscoverer;
+import org.sourcepit.tpmp.ee.ExecutionEnvironmentSelector;
+import org.sourcepit.tpmp.resolver.TargetPlatformResolver;
 
 /**
  * @goal materialize-target-platform

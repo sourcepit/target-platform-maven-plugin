@@ -4,7 +4,7 @@
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
 
-package org.sourcepit.mtp.resolver.tycho;
+package org.sourcepit.tpmp.resolver.tycho;
 
 import java.util.ArrayList;
 import java.util.List;

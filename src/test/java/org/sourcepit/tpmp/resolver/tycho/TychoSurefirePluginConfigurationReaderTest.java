@@ -4,7 +4,7 @@
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
 
-package org.sourcepit.mtp.resolver.tycho;
+package org.sourcepit.tpmp.resolver.tycho;
 
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
@@ -21,8 +21,8 @@ import org.junit.Test;
 import org.sourcepit.common.maven.testing.EmbeddedMavenEnvironmentTest;
 import org.sourcepit.common.maven.testing.MavenExecutionResult2;
 import org.sourcepit.common.testing.Environment;
-import org.sourcepit.mtp.resolver.tycho.TychoSurefirePluginConfiguration;
-import org.sourcepit.mtp.resolver.tycho.TychoSurefirePluginConfigurationReader;
+import org.sourcepit.tpmp.resolver.tycho.TychoSurefirePluginConfiguration;
+import org.sourcepit.tpmp.resolver.tycho.TychoSurefirePluginConfigurationReader;
 
 public class TychoSurefirePluginConfigurationReaderTest extends EmbeddedMavenEnvironmentTest
 {

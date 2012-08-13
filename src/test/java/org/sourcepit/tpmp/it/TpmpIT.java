@@ -4,7 +4,7 @@
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
 
-package org.sourcepit.mtp.it;
+package org.sourcepit.tpmp.it;
 
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertFalse;
@@ -19,7 +19,7 @@ import org.junit.Test;
 import org.sourcepit.common.maven.testing.ExternalMavenTest;
 import org.sourcepit.common.testing.Environment;
 
-public class MtpIT extends ExternalMavenTest
+public class TpmpIT extends ExternalMavenTest
 {
    @Override
    protected boolean isDebug()
@@ -38,7 +38,7 @@ public class MtpIT extends ExternalMavenTest
    {
       final String projectVersion = getEnvironment().getProperty("project.version");
       final File projectDir = getResource("tycho-reactor");
-      build(projectDir, "-e", "-B", "org.sourcepit:materialize-target-platform-maven-plugin:" + projectVersion
+      build(projectDir, "-e", "-B", "org.sourcepit:target-platform-maven-plugin:" + projectVersion
          + ":materialize-target-platform");
 
       final File platformDir = getPlatformDir(projectDir);
@@ -76,7 +76,7 @@ public class MtpIT extends ExternalMavenTest
       final String projectVersion = getEnvironment().getProperty("project.version");
       final File projectDir = getResource("tycho-reactor");
       build(projectDir, "-Dtycho.mode=maven", "-e", "-B", "clean",
-         "org.sourcepit:materialize-target-platform-maven-plugin:" + projectVersion + ":materialize-target-platform");
+         "org.sourcepit:target-platform-maven-plugin:" + projectVersion + ":materialize-target-platform");
 
       final File platformDir = getPlatformDir(projectDir);
       assertTrue(platformDir.exists());
@@ -126,7 +126,7 @@ public class MtpIT extends ExternalMavenTest
       FileUtils.forceDelete(featuresDir);
       FileUtils.forceDelete(pluginsDir);
 
-      build(projectDir, "-Dtycho.mode=maven", "-e", "-B", "org.sourcepit:materialize-target-platform-maven-plugin:"
+      build(projectDir, "-Dtycho.mode=maven", "-e", "-B", "org.sourcepit:target-platform-maven-plugin:"
          + projectVersion + ":materialize-target-platform");
 
       assertFalse(featuresDir.exists());
@@ -141,7 +141,7 @@ public class MtpIT extends ExternalMavenTest
       final File reactorDir = getResource("tycho-reactor");
 
       final File projectDir = new File(reactorDir, "org.sourcepit.mtp.tests");
-      build(projectDir, "-e", "-B", "clean", "org.sourcepit:materialize-target-platform-maven-plugin:" + projectVersion
+      build(projectDir, "-e", "-B", "clean", "org.sourcepit:target-platform-maven-plugin:" + projectVersion
          + ":materialize-target-platform");
 
       final File platformDir = getPlatformDir(projectDir);
@@ -176,7 +176,7 @@ public class MtpIT extends ExternalMavenTest
       final File reactorDir = getResource("tycho-reactor");
 
       final File projectDir = new File(reactorDir, "org.sourcepit.mtp");
-      build(projectDir, "-e", "-B", "clean", "org.sourcepit:materialize-target-platform-maven-plugin:" + projectVersion
+      build(projectDir, "-e", "-B", "clean", "org.sourcepit:target-platform-maven-plugin:" + projectVersion
          + ":materialize-target-platform");
 
       final File platformDir = getPlatformDir(projectDir);
