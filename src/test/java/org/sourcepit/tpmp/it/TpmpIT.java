@@ -38,8 +38,7 @@ public class TpmpIT extends ExternalMavenTest
    {
       final String projectVersion = getEnvironment().getProperty("project.version");
       final File projectDir = getResource("tycho-reactor");
-      build(projectDir, "-e", "-B", "org.sourcepit:target-platform-maven-plugin:" + projectVersion
-         + ":materialize-target-platform");
+      build(projectDir, "-e", "-B", "org.sourcepit:target-platform-maven-plugin:" + projectVersion + ":materialize");
 
       final File platformDir = getPlatformDir(projectDir);
       assertTrue(platformDir.exists());
@@ -75,8 +74,8 @@ public class TpmpIT extends ExternalMavenTest
    {
       final String projectVersion = getEnvironment().getProperty("project.version");
       final File projectDir = getResource("tycho-reactor");
-      build(projectDir, "-Dtycho.mode=maven", "-e", "-B", "clean",
-         "org.sourcepit:target-platform-maven-plugin:" + projectVersion + ":materialize-target-platform");
+      build(projectDir, "-Dtycho.mode=maven", "-e", "-B", "clean", "org.sourcepit:target-platform-maven-plugin:"
+         + projectVersion + ":materialize");
 
       final File platformDir = getPlatformDir(projectDir);
       assertTrue(platformDir.exists());
@@ -127,7 +126,7 @@ public class TpmpIT extends ExternalMavenTest
       FileUtils.forceDelete(pluginsDir);
 
       build(projectDir, "-Dtycho.mode=maven", "-e", "-B", "org.sourcepit:target-platform-maven-plugin:"
-         + projectVersion + ":materialize-target-platform");
+         + projectVersion + ":materialize");
 
       assertFalse(featuresDir.exists());
       assertFalse(pluginsDir.exists());
@@ -142,7 +141,7 @@ public class TpmpIT extends ExternalMavenTest
 
       final File projectDir = new File(reactorDir, "org.sourcepit.mtp.tests");
       build(projectDir, "-e", "-B", "clean", "org.sourcepit:target-platform-maven-plugin:" + projectVersion
-         + ":materialize-target-platform");
+         + ":materialize");
 
       final File platformDir = getPlatformDir(projectDir);
       assertTrue(platformDir.exists());
@@ -177,7 +176,7 @@ public class TpmpIT extends ExternalMavenTest
 
       final File projectDir = new File(reactorDir, "org.sourcepit.mtp");
       build(projectDir, "-e", "-B", "clean", "org.sourcepit:target-platform-maven-plugin:" + projectVersion
-         + ":materialize-target-platform");
+         + ":materialize");
 
       final File platformDir = getPlatformDir(projectDir);
       assertTrue(platformDir.exists());
