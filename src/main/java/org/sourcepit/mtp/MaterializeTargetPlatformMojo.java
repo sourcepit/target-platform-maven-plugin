@@ -7,17 +7,29 @@
 package org.sourcepit.mtp;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Collection;
 
 import javax.inject.Inject;
 
+import org.apache.commons.io.FileUtils;
+import org.apache.maven.artifact.Artifact;
+import org.apache.maven.artifact.deployer.ArtifactDeployer;
+import org.apache.maven.artifact.deployer.ArtifactDeploymentException;
+import org.apache.maven.artifact.installer.ArtifactInstallationException;
+import org.apache.maven.artifact.installer.ArtifactInstaller;
+import org.apache.maven.artifact.resolver.ArtifactResolutionRequest;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.project.MavenProject;
+import org.apache.maven.repository.RepositorySystem;
 import org.slf4j.Logger;
+import org.sourcepit.common.utils.lang.Exceptions;
 import org.sourcepit.common.utils.path.PathUtils;
+import org.sourcepit.common.utils.zip.ZipProcessingRequest;
+import org.sourcepit.common.utils.zip.ZipProcessor;
 import org.sourcepit.guplex.Guplex;
 import org.sourcepit.mtp.change.TargetPlatformConfigurationChangeDiscoverer;
 import org.sourcepit.mtp.ee.ExecutionEnvironmentSelector;
@@ -44,8 +56,11 @@ public class MaterializeTargetPlatformMojo extends AbstractMojo
     */
    private MavenSession session;
 
-   /** @parameter expression="${mtp.forceResolution}" default-value="false" */
-   private boolean forceResolution;
+   /** @parameter expression="${mtp.forceUpdate}" default-value="false" */
+   private boolean forceUpdate;
+
+   /** @parameter default-value="target" */
+   private String classifier;
 
    /** @component */
    private Guplex guplex;
@@ -62,6 +77,15 @@ public class MaterializeTargetPlatformMojo extends AbstractMojo
    @Inject
    private Logger log;
 
+   @Inject
+   private RepositorySystem repositorySystem;
+
+   @Inject
+   private ArtifactDeployer deployer;
+
+   @Inject
+   private ArtifactInstaller installer;
+
    public final void execute() throws MojoExecutionException, MojoFailureException
    {
       guplex.inject(this, true);
@@ -70,7 +94,13 @@ public class MaterializeTargetPlatformMojo extends AbstractMojo
 
    private void doExecute() throws MojoExecutionException, MojoFailureException
    {
+      final MavenProject project = session.getCurrentProject();
+
       final File platformDir = getPlatformDir();
+      if (!platformDir.exists() && !forceUpdate)
+      {
+         download(session, project, platformDir);
+      }
 
       final CopyTargetPlatformResolutionHandler resolutionHandler = new CopyTargetPlatformResolutionHandler(platformDir);
       resolve(new File(platformDir, ".mtp"), resolutionHandler);
@@ -79,7 +109,93 @@ public class MaterializeTargetPlatformMojo extends AbstractMojo
 
       writeDefinitions(platformDir, executionEnvironment, resolutionHandler.getTargetEnvironments());
 
-      new SimpleZipper().zip(platformDir, getPlatformZipFile(), getFinalName());
+      final File platformZipFile = getPlatformZipFile();
+      new SimpleZipper().zip(platformDir, platformZipFile, getClassifiedName());
+
+      installAndDeploy(session, project, platformZipFile);
+   }
+
+   private void installAndDeploy(MavenSession session, MavenProject project, File platformZipFile)
+   {
+      final Artifact platformArtifact = createPlatformArtifact(project);
+      platformArtifact.setFile(platformZipFile);
+
+      try
+      {
+         installer.install(platformZipFile, platformArtifact, session.getLocalRepository());
+      }
+      catch (ArtifactInstallationException e)
+      {
+         throw Exceptions.pipe(e);
+      }
+
+      try
+      {
+         deployer.deploy(platformZipFile, platformArtifact, project.getDistributionManagementArtifactRepository(),
+            session.getLocalRepository());
+      }
+      catch (ArtifactDeploymentException e)
+      {
+         throw Exceptions.pipe(e);
+      }
+   }
+
+   private void download(MavenSession session, MavenProject project, File platformDir)
+   {
+      final Artifact platformArtifact = createPlatformArtifact(project);
+
+      final ArtifactResolutionRequest request = new ArtifactResolutionRequest();
+      request.setArtifact(platformArtifact);
+      request.setResolveRoot(true);
+      request.setResolveTransitively(false);
+      request.setLocalRepository(session.getLocalRepository());
+      request.setRemoteRepositories(project.getRemoteArtifactRepositories());
+      request.setManagedVersionMap(project.getManagedVersionMap());
+      request.setOffline(session.isOffline());
+
+      repositorySystem.resolve(request);
+
+      if (platformArtifact.getFile().exists())
+      {
+         final ZipProcessingRequest unzipRequest = ZipProcessingRequest.newUnzipRequest(platformArtifact.getFile(),
+            platformDir);
+         try
+         {
+            new ZipProcessor().process(unzipRequest);
+         }
+         catch (IOException e)
+         {
+            throw Exceptions.pipe(e);
+         }
+         try
+         {
+            final File zipRoot = platformDir.listFiles()[0];
+            final File[] files = zipRoot.listFiles();
+            for (File file : files)
+            {
+               if (file.isDirectory())
+               {
+                  FileUtils.moveDirectory(file, new File(platformDir, file.getName()));
+               }
+               else
+               {
+                  FileUtils.moveFile(file, new File(platformDir, file.getName()));
+               }
+            }
+            FileUtils.forceDelete(zipRoot);
+         }
+         catch (IOException e)
+         {
+            throw Exceptions.pipe(e);
+         }
+      }
+   }
+
+   private Artifact createPlatformArtifact(MavenProject project)
+   {
+      final Artifact platformArtifact = repositorySystem.createArtifactWithClassifier(project.getGroupId(),
+         project.getArtifactId(), project.getVersion(), "zip", classifier);
+      return platformArtifact;
    }
 
    private void writeDefinitions(File platformDir, String executionEnvironment,
@@ -155,21 +271,32 @@ public class MaterializeTargetPlatformMojo extends AbstractMojo
       {
          return true;
       }
-      return forceResolution;
+      return forceUpdate;
    }
 
    private File getPlatformZipFile()
    {
-      return new File(targetDir, getFinalName() + ".zip");
+      return new File(targetDir, getClassifiedName() + ".zip");
    }
 
    private File getPlatformDir()
    {
-      return new File(targetDir, "target-platform");
+      return new File(targetDir, getClassifiedName());
+   }
+
+   private String getClassifiedName()
+   {
+      return getFinalName() + "-" + classifier;
    }
 
    private String getFinalName()
    {
-      return "target-platform-" + session.getCurrentProject().getVersion() + "-target";
+      final MavenProject project = session.getCurrentProject();
+      String finalName = project.getBuild().getFinalName();
+      if (finalName == null)
+      {
+         finalName = project.getArtifactId() + "-" + project.getVersion();
+      }
+      return finalName;
    }
 }

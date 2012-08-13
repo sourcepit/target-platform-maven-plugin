@@ -57,4 +57,15 @@
 		</plugins>
 	</build>
 
+	<distributionManagement>
+		<repository>
+			<id>releases</id>
+			<url>file:////${it.dir}/repository</url>
+		</repository>
+		<snapshotRepository>
+			<id>snapshots</id>
+			<url>file:////${it.dir}/repository</url>
+		</snapshotRepository>
+	</distributionManagement>
+
 </project>

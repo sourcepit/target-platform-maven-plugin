@@ -41,7 +41,7 @@ public class MtpIT extends ExternalMavenTest
       build(projectDir, "-e", "-B", "org.sourcepit:materialize-target-platform-maven-plugin:" + projectVersion
          + ":materialize-target-platform");
 
-      final File platformDir = new File(projectDir, "target/target-platform");
+      final File platformDir = getPlatformDir(projectDir);
       assertTrue(platformDir.exists());
 
       final File featuresDir = new File(platformDir, "features");
@@ -65,6 +65,11 @@ public class MtpIT extends ExternalMavenTest
       assertThat(junitPlugins[0].isDirectory(), is(true));
    }
 
+   private File getPlatformDir(final File projectDir)
+   {
+      return new File(projectDir, "target/" + projectDir.getName() + "-0.1.0-SNAPSHOT-target");
+   }
+
    @Test
    public void testReactorTychoModeMaven() throws Exception
    {
@@ -73,7 +78,7 @@ public class MtpIT extends ExternalMavenTest
       build(projectDir, "-Dtycho.mode=maven", "-e", "-B", "clean",
          "org.sourcepit:materialize-target-platform-maven-plugin:" + projectVersion + ":materialize-target-platform");
 
-      final File platformDir = new File(projectDir, "target/target-platform");
+      final File platformDir = getPlatformDir(projectDir);
       assertTrue(platformDir.exists());
 
       final File featuresDir = new File(platformDir, "features");
@@ -106,7 +111,7 @@ public class MtpIT extends ExternalMavenTest
       final File projectDir = new File(getWs().getRoot(), "tycho-reactor");
       assertTrue(projectDir.exists());
 
-      final File platformDir = new File(projectDir, "target/target-platform");
+      final File platformDir = getPlatformDir(projectDir);
       assertTrue(platformDir.exists());
 
       final File featuresDir = new File(platformDir, "features");
@@ -139,7 +144,7 @@ public class MtpIT extends ExternalMavenTest
       build(projectDir, "-e", "-B", "clean", "org.sourcepit:materialize-target-platform-maven-plugin:" + projectVersion
          + ":materialize-target-platform");
 
-      final File platformDir = new File(projectDir, "target/target-platform");
+      final File platformDir = getPlatformDir(projectDir);
       assertTrue(platformDir.exists());
 
       final File featuresDir = new File(platformDir, "features");
@@ -174,7 +179,7 @@ public class MtpIT extends ExternalMavenTest
       build(projectDir, "-e", "-B", "clean", "org.sourcepit:materialize-target-platform-maven-plugin:" + projectVersion
          + ":materialize-target-platform");
 
-      final File platformDir = new File(projectDir, "target/target-platform");
+      final File platformDir = getPlatformDir(projectDir);
       assertTrue(platformDir.exists());
 
       final File featuresDir = new File(platformDir, "features");
