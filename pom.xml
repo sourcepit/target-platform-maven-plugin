@@ -208,67 +208,6 @@
 				</executions>
 			</plugin>
 			<plugin>
-				<artifactId>maven-dependency-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>unpack-maven</id>
-						<phase>pre-integration-test</phase>
-						<goals>
-							<goal>unpack</goal>
-						</goals>
-						<configuration>
-							<artifactItems>
-								<artifactItem>
-									<groupId>org.apache.maven</groupId>
-									<artifactId>apache-maven</artifactId>
-									<version>${it.maven.version}</version>
-									<classifier>bin</classifier>
-									<type>tar.gz</type>
-									<overWrite>true</overWrite>
-									<outputDirectory>${it.bin.dir}</outputDirectory>
-								</artifactItem>
-							</artifactItems>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-deploy-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>gather-artifacts</id>
-						<!-- As far we use our own install mojo that assures that each artifact 
-							will be deployed with its base version, we can call the deploy goal before 
-							the phase install, otherwise not! -->
-						<phase>pre-integration-test</phase>
-						<goals>
-							<goal>deploy</goal>
-						</goals>
-						<configuration>
-							<altDeploymentRepository>it-repo::default::${it.repo.url}</altDeploymentRepository>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<artifactId>maven-failsafe-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>integration-test</id>
-						<goals>
-							<goal>integration-test</goal>
-						</goals>
-					</execution>
-					<execution>
-						<id>verify</id>
-						<goals>
-							<goal>verify</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
 				<groupId>org.sourcepit.tools</groupId>
 				<artifactId>maven-install-plugin</artifactId>
 				<executions>
@@ -326,6 +265,78 @@
 								<configuration>
 									<localRepositoryPath>${it.localRepository}</localRepositoryPath>
 								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+		<profile>
+			<id>its</id>
+			<properties>
+				<it.repo.active>true</it.repo.active>
+				<it.repo.url>file://${user.dir}/target/it-repository</it.repo.url>
+			</properties>
+			<build>
+				<plugins>
+					<plugin>
+						<artifactId>maven-dependency-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>unpack-maven</id>
+								<phase>pre-integration-test</phase>
+								<goals>
+									<goal>unpack</goal>
+								</goals>
+								<configuration>
+									<artifactItems>
+										<artifactItem>
+											<groupId>org.apache.maven</groupId>
+											<artifactId>apache-maven</artifactId>
+											<version>${it.maven.version}</version>
+											<classifier>bin</classifier>
+											<type>tar.gz</type>
+											<overWrite>true</overWrite>
+											<outputDirectory>${it.bin.dir}</outputDirectory>
+										</artifactItem>
+									</artifactItems>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-deploy-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>gather-artifacts</id>
+								<!-- As far we use our own install mojo that assures that each artifact 
+									will be deployed with its base version, we can call the deploy goal before 
+									the phase install, otherwise not! -->
+								<phase>pre-integration-test</phase>
+								<goals>
+									<goal>deploy</goal>
+								</goals>
+								<configuration>
+									<altDeploymentRepository>it-repo::default::${it.repo.url}</altDeploymentRepository>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
+						<artifactId>maven-failsafe-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>integration-test</id>
+								<goals>
+									<goal>integration-test</goal>
+								</goals>
+							</execution>
+							<execution>
+								<id>verify</id>
+								<goals>
+									<goal>verify</goal>
+								</goals>
 							</execution>
 						</executions>
 					</plugin>
