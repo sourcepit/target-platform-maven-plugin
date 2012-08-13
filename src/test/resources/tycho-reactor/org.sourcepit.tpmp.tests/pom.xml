@@ -8,7 +8,7 @@
 		<version>0.1.0-SNAPSHOT</version>
 	</parent>
 
-	<artifactId>org.sourcepit.mtp.tests</artifactId>
+	<artifactId>org.sourcepit.tpmp.tests</artifactId>
 	<packaging>eclipse-test-plugin</packaging>
 
 	<build>

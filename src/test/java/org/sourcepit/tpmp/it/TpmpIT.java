@@ -49,7 +49,7 @@ public class TpmpIT extends ExternalMavenTest
       final File pluginsDir = new File(platformDir, "plugins");
       assertTrue(pluginsDir.exists());
 
-      // org.eclipse.pde is contributed via the org.sourcepit.mtp.feature
+      // org.eclipse.pde is contributed via the org.sourcepit.tpmp.feature
       File[] pdeFeatures = collectFiles(featuresDir, "org.eclipse.pde");
       assertThat(pdeFeatures.length, is(1));
 
@@ -86,7 +86,7 @@ public class TpmpIT extends ExternalMavenTest
       final File pluginsDir = new File(platformDir, "plugins");
       assertTrue(pluginsDir.exists());
 
-      // org.eclipse.pde is contributed via the org.sourcepit.mtp.feature
+      // org.eclipse.pde is contributed via the org.sourcepit.tpmp.feature
       File[] pdeFeatures = collectFiles(featuresDir, "org.eclipse.pde");
       assertThat(pdeFeatures.length, is(1));
 
@@ -119,7 +119,7 @@ public class TpmpIT extends ExternalMavenTest
       final File pluginsDir = new File(platformDir, "plugins");
       assertTrue(pluginsDir.exists());
 
-      final File metadataDir = new File(platformDir, ".mtp");
+      final File metadataDir = new File(platformDir, ".tpmp");
       assertTrue(metadataDir.exists());
 
       FileUtils.forceDelete(featuresDir);
@@ -139,7 +139,7 @@ public class TpmpIT extends ExternalMavenTest
 
       final File reactorDir = getResource("tycho-reactor");
 
-      final File projectDir = new File(reactorDir, "org.sourcepit.mtp.tests");
+      final File projectDir = new File(reactorDir, "org.sourcepit.tpmp.tests");
       build(projectDir, "-e", "-B", "clean", "org.sourcepit:target-platform-maven-plugin:" + projectVersion
          + ":materialize");
 
@@ -152,7 +152,7 @@ public class TpmpIT extends ExternalMavenTest
       final File pluginsDir = new File(platformDir, "plugins");
       assertTrue(pluginsDir.exists());
 
-      // org.eclipse.pde is contributed via the org.sourcepit.mtp.feature
+      // org.eclipse.pde is contributed via the org.sourcepit.tpmp.feature
       File[] pdeFeatures = collectFiles(featuresDir, "org.eclipse.pde");
       assertThat(pdeFeatures.length, is(0));
 
@@ -174,7 +174,7 @@ public class TpmpIT extends ExternalMavenTest
 
       final File reactorDir = getResource("tycho-reactor");
 
-      final File projectDir = new File(reactorDir, "org.sourcepit.mtp");
+      final File projectDir = new File(reactorDir, "org.sourcepit.tpmp");
       build(projectDir, "-e", "-B", "clean", "org.sourcepit:target-platform-maven-plugin:" + projectVersion
          + ":materialize");
 
@@ -187,7 +187,7 @@ public class TpmpIT extends ExternalMavenTest
       final File pluginsDir = new File(platformDir, "plugins");
       assertTrue(pluginsDir.exists());
 
-      // org.eclipse.pde is contributed via the org.sourcepit.mtp.feature
+      // org.eclipse.pde is contributed via the org.sourcepit.tpmp.feature
       File[] pdeFeatures = collectFiles(featuresDir, "org.eclipse.pde");
       assertThat(pdeFeatures.length, is(0));
 

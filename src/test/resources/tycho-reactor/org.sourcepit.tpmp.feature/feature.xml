@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
-      id="org.sourcepit.mtp.feature"
+      id="org.sourcepit.tpmp.feature"
       version="1.0.0.qualifier">
 
    <description url="http://www.example.com/description">
@@ -20,14 +20,14 @@
    </requires>
 
    <plugin
-         id="org.sourcepit.mtp"
+         id="org.sourcepit.tpmp"
          download-size="0"
          install-size="0"
          version="0.0.0"
          unpack="false"/>
 
    <plugin
-         id="org.sourcepit.mtp.tests"
+         id="org.sourcepit.tpmp.tests"
          download-size="0"
          install-size="0"
          version="0.0.0"

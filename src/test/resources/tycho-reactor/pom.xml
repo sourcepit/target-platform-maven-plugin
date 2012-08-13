@@ -7,9 +7,9 @@
 	<packaging>pom</packaging>
 
 	<modules>
-		<module>org.sourcepit.mtp</module>
-		<module>org.sourcepit.mtp.tests</module>
-		<module>org.sourcepit.mtp.feature</module>
+		<module>org.sourcepit.tpmp</module>
+		<module>org.sourcepit.tpmp.tests</module>
+		<module>org.sourcepit.tpmp.feature</module>
 	</modules>
 
 	<properties>
