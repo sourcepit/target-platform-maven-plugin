@@ -38,7 +38,7 @@ public abstract class AbstractTargetPlatformMojo extends AbstractGuplexedMojo
    /** @parameter expression="${tpmp.forceUpdate}" default-value="false" */
    private boolean forceUpdate;
 
-   /** @parameter default-value="target" */
+   /** @parameter expression="${tpmp.classifier}" default-value="target" */
    protected String classifier;
 
    @Inject
