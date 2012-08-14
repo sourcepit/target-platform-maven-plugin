@@ -11,10 +11,13 @@ import static org.sourcepit.common.utils.io.IOResources.byteIn;
 import static org.sourcepit.common.utils.io.IOResources.fileIn;
 
 import java.io.File;
+import java.io.FilterReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.io.UnsupportedEncodingException;
-import java.security.DigestInputStream;
+import java.nio.charset.Charset;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
@@ -26,6 +29,8 @@ import javax.inject.Named;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.maven.project.MavenProject;
+import org.sourcepit.common.utils.charset.CharsetDetectionResult;
+import org.sourcepit.common.utils.charset.CharsetDetector;
 import org.sourcepit.common.utils.io.IOOperation;
 import org.sourcepit.common.utils.io.IOResource;
 import org.sourcepit.common.utils.lang.Exceptions;
@@ -35,12 +40,15 @@ import org.sourcepit.common.utils.props.PropertiesMap;
 @Named
 public class ChecksumTargetPlatformConfigurationChangeDiscoverer implements TargetPlatformConfigurationChangeDiscoverer
 {
+   private final CharsetDetector charsetDetector;
+
    private final TargetPlatformConfigurationFilesDiscoverer configFilesDiscoverer;
 
    @Inject
-   public ChecksumTargetPlatformConfigurationChangeDiscoverer(
+   public ChecksumTargetPlatformConfigurationChangeDiscoverer(CharsetDetector charsetDetector,
       TargetPlatformConfigurationFilesDiscoverer configFilesDiscoverer)
    {
+      this.charsetDetector = charsetDetector;
       this.configFilesDiscoverer = configFilesDiscoverer;
    }
 
@@ -64,7 +72,14 @@ public class ChecksumTargetPlatformConfigurationChangeDiscoverer implements Targ
 
    public void clearTargetPlatformConfigurationStausCache(File statusCacheDir, MavenProject project)
    {
-
+      final File checksumFile = new File(statusCacheDir, "project-status.properties");
+      final PropertiesMap properties = new LinkedPropertiesMap();
+      if (checksumFile.exists())
+      {
+         properties.load(checksumFile);
+         properties.remove(project.getId());
+         properties.store(checksumFile);
+      }
    }
 
    private String computeProjectChecksum(MavenProject project)
@@ -82,21 +97,26 @@ public class ChecksumTargetPlatformConfigurationChangeDiscoverer implements Targ
       return computeProjectsChecksum(projects);
    }
 
+   private String getDefaultEncoding(MavenProject project)
+   {
+      return project.getProperties().getProperty("project.build.sourceEncoding", Charset.defaultCharset().name());
+   }
+
    private String computeProjectsChecksum(List<MavenProject> projects)
    {
       final StringBuilder sb = new StringBuilder();
-      for (MavenProject project : projects)
+      for (final MavenProject project : projects)
       {
          final List<File> files = configFilesDiscoverer.getTargetPlatformConfigurationFiles(project);
-         for (File file : files)
+         for (final File file : files)
          {
-            sb.append(calculateHash(file));
+            sb.append(calculateHash(file, detectEncoding(project, file)));
          }
       }
 
       try
       {
-         return calculateHash(sb.toString().getBytes("ASCII"));
+         return calculateHash(sb.toString().getBytes("ASCII"), "ASCII");
       }
       catch (UnsupportedEncodingException e)
       {
@@ -104,52 +124,141 @@ public class ChecksumTargetPlatformConfigurationChangeDiscoverer implements Targ
       }
    }
 
-   private static String calculateHash(File file)
+   private String detectEncoding(final MavenProject project, final File file)
    {
-      final MessageDigest sha1;
-      try
-      {
-         sha1 = MessageDigest.getInstance("SHA1");
-      }
-      catch (NoSuchAlgorithmException e)
-      {
-         throw Exceptions.pipe(e);
-      }
-      return calculateHash(sha1, buffIn(fileIn(file)));
-   }
+      final CharsetDetectionResult[] result = new CharsetDetectionResult[1];
 
-   private static String calculateHash(byte[] bytes)
-   {
-      final MessageDigest sha1;
-      try
-      {
-         sha1 = MessageDigest.getInstance("SHA1");
-      }
-      catch (NoSuchAlgorithmException e)
-      {
-         throw Exceptions.pipe(e);
-      }
-      return calculateHash(sha1, buffIn(byteIn(bytes)));
-   }
-
-   private static String calculateHash(final MessageDigest algorithm, final IOResource<? extends InputStream> ioResource)
-   {
-      new IOOperation<InputStream>(ioResource)
+      new IOOperation<InputStream>(fileIn(file))
       {
          @Override
          protected void run(InputStream openResource) throws IOException
          {
-            final DigestInputStream dis = new DigestInputStream(openResource, algorithm);
-            // read the file and update the hash calculation
-            while (dis.read() != -1)
-               ;
+            result[0] = charsetDetector.detect(file.getName(), openResource, getDefaultEncoding(project));
          }
       }.run();
+
+      return result[0].getRecommendedCharset().name();
+   }
+
+   private static String calculateHash(File file, String encoding)
+   {
+      final MessageDigest sha1;
+      try
+      {
+         sha1 = MessageDigest.getInstance("SHA1");
+      }
+      catch (NoSuchAlgorithmException e)
+      {
+         throw Exceptions.pipe(e);
+      }
+
+      return calculateHash(sha1, buffIn(fileIn(file)), encoding);
+   }
+
+   private static String calculateHash(byte[] bytes, String encoding)
+   {
+      final MessageDigest sha1;
+      try
+      {
+         sha1 = MessageDigest.getInstance("SHA1");
+      }
+      catch (NoSuchAlgorithmException e)
+      {
+         throw Exceptions.pipe(e);
+      }
+      return calculateHash(sha1, buffIn(byteIn(bytes)), encoding);
+   }
+
+   private static String calculateHash(final MessageDigest algorithm,
+      final IOResource<? extends InputStream> ioResource, final String encoding)
+   {
+      Reader reader = null;
+      InputStream inputStream = null;
+      try
+      {
+         inputStream = ioResource.open();
+         reader = new WhitespaceFilterReader(new InputStreamReader(inputStream, encoding));
+
+         int ch = reader.read();
+         while (ch > -1)
+         {
+            algorithm.update((byte) ((ch & 0xFF00) >> 8));
+            algorithm.update((byte) (ch & 0x00FF));
+            ch = reader.read();
+         }
+      }
+      catch (IOException e)
+      {
+         throw Exceptions.pipe(e);
+      }
+      finally
+      {
+         IOUtils.closeQuietly(reader);
+      }
 
       // get the hash value as byte array
       byte[] hash = algorithm.digest();
 
       return byteArray2Hex(hash);
+   }
+
+   private static final class WhitespaceFilterReader extends FilterReader
+   {
+      private WhitespaceFilterReader(Reader in)
+      {
+         super(in);
+      }
+
+      @Override
+      public long skip(long n) throws IOException
+      {
+         if (n < 0L)
+         {
+            throw new IllegalArgumentException("skip value is negative");
+         }
+
+         for (long i = 0; i < n; i++)
+         {
+            if (read() == -1)
+            {
+               return i;
+            }
+         }
+         return n;
+      }
+
+      @Override
+      public int read(char[] cbuf, int off, int len) throws IOException
+      {
+         for (int i = 0; i < len; i++)
+         {
+            int ch = read();
+            if (ch == -1)
+            {
+               if (i == 0)
+               {
+                  return -1;
+               }
+               else
+               {
+                  return i;
+               }
+            }
+            cbuf[off + i] = (char) ch;
+         }
+         return len;
+      }
+
+      @Override
+      public int read() throws IOException
+      {
+         int ch = super.read();
+         while (Character.isWhitespace(ch))
+         {
+            ch = super.read();
+         }
+         return ch;
+      }
    }
 
    private static String byteArray2Hex(byte[] hash)
