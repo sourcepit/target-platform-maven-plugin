@@ -34,6 +34,7 @@ import org.sourcepit.common.utils.charset.CharsetDetector;
 import org.sourcepit.common.utils.io.IOOperation;
 import org.sourcepit.common.utils.io.IOResource;
 import org.sourcepit.common.utils.lang.Exceptions;
+import org.sourcepit.common.utils.path.PathUtils;
 import org.sourcepit.common.utils.props.LinkedPropertiesMap;
 import org.sourcepit.common.utils.props.PropertiesMap;
 
@@ -58,7 +59,7 @@ public class ChecksumTargetPlatformConfigurationChangeDiscoverer implements Targ
       // get last project checksum
       final String lastChecksum = getProjectChecksum(statusCacheDir, project);
       // compute new project checksum
-      final String newChecksum = computeProjectChecksum(project);
+      final String newChecksum = computeProjectChecksum(statusCacheDir, project);
       // compare
       if (lastChecksum == null || !newChecksum.equals(lastChecksum))
       {
@@ -82,7 +83,7 @@ public class ChecksumTargetPlatformConfigurationChangeDiscoverer implements Targ
       }
    }
 
-   private String computeProjectChecksum(MavenProject project)
+   private String computeProjectChecksum(File statusCacheDir, MavenProject project)
    {
       final List<MavenProject> projects = new ArrayList<MavenProject>();
       projects.add(project);
@@ -94,7 +95,7 @@ public class ChecksumTargetPlatformConfigurationChangeDiscoverer implements Targ
          parent = parent.getParent();
       }
 
-      return computeProjectsChecksum(projects);
+      return computeProjectsChecksum(statusCacheDir, projects);
    }
 
    private String getDefaultEncoding(MavenProject project)
@@ -102,7 +103,7 @@ public class ChecksumTargetPlatformConfigurationChangeDiscoverer implements Targ
       return project.getProperties().getProperty("project.build.sourceEncoding", Charset.defaultCharset().name());
    }
 
-   private String computeProjectsChecksum(List<MavenProject> projects)
+   private String computeProjectsChecksum(File statusCacheDir, List<MavenProject> projects)
    {
       final StringBuilder sb = new StringBuilder();
       for (final MavenProject project : projects)
@@ -110,7 +111,13 @@ public class ChecksumTargetPlatformConfigurationChangeDiscoverer implements Targ
          final List<File> files = configFilesDiscoverer.getTargetPlatformConfigurationFiles(project);
          for (final File file : files)
          {
-            sb.append(calculateHash(file, detectEncoding(project, file)));
+            final String encoding = detectEncoding(project, file);
+            final String hash = calculateHash(file, encoding);
+            final String path = PathUtils.getRelativePath(file, new File("").getAbsoluteFile(), "/");
+            
+            dump(statusCacheDir, path, encoding, hash);
+            
+            sb.append(hash);
          }
       }
 
@@ -122,6 +129,30 @@ public class ChecksumTargetPlatformConfigurationChangeDiscoverer implements Targ
       {
          throw Exceptions.pipe(e);
       }
+   }
+
+   private void dump(File statusCacheDir, String path, String encoding, String hash)
+   {
+      final File checksumFile = new File(statusCacheDir, "dump.properties");
+      final PropertiesMap properties = new LinkedPropertiesMap();
+      if (checksumFile.exists())
+      {
+         properties.load(checksumFile);
+      }
+      else
+      {
+         checksumFile.getParentFile().mkdirs();
+         try
+         {
+            checksumFile.createNewFile();
+         }
+         catch (IOException e)
+         {
+            throw Exceptions.pipe(e);
+         }
+      }
+      properties.put(path + "@" +  encoding, hash);
+      properties.store(checksumFile);
    }
 
    private String detectEncoding(final MavenProject project, final File file)
