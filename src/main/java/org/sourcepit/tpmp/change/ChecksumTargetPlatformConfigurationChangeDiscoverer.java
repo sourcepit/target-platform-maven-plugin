@@ -23,11 +23,13 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Formatter;
 import java.util.List;
+import java.util.Map;
 
 import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.maven.execution.MavenSession;
 import org.apache.maven.project.MavenProject;
 import org.sourcepit.common.utils.charset.CharsetDetectionResult;
 import org.sourcepit.common.utils.charset.CharsetDetector;
@@ -37,29 +39,30 @@ import org.sourcepit.common.utils.lang.Exceptions;
 import org.sourcepit.common.utils.path.PathUtils;
 import org.sourcepit.common.utils.props.LinkedPropertiesMap;
 import org.sourcepit.common.utils.props.PropertiesMap;
+import org.sourcepit.tpmp.ToolUtils;
 
 @Named
 public class ChecksumTargetPlatformConfigurationChangeDiscoverer implements TargetPlatformConfigurationChangeDiscoverer
 {
    private final CharsetDetector charsetDetector;
 
-   private final TargetPlatformConfigurationFilesDiscoverer configFilesDiscoverer;
+   private final Map<String, TargetPlatformConfigurationFilesDiscoverer> configFilesDiscovererMap;
 
    @Inject
    public ChecksumTargetPlatformConfigurationChangeDiscoverer(CharsetDetector charsetDetector,
-      TargetPlatformConfigurationFilesDiscoverer configFilesDiscoverer)
+      Map<String, TargetPlatformConfigurationFilesDiscoverer> configFilesDiscovererMap)
    {
       this.charsetDetector = charsetDetector;
-      this.configFilesDiscoverer = configFilesDiscoverer;
+      this.configFilesDiscovererMap = configFilesDiscovererMap;
    }
 
-   public boolean hasTargetPlatformConfigurationChanged(File statusCacheDir, MavenProject project)
+   public boolean hasTargetPlatformConfigurationChanged(File statusCacheDir, MavenSession session, MavenProject project)
    {
       // always update project checksums
       // get last project checksum
       final String lastChecksum = getProjectChecksum(statusCacheDir, project);
       // compute new project checksum
-      final String newChecksum = computeProjectChecksum(statusCacheDir, project);
+      final String newChecksum = computeProjectChecksum(statusCacheDir, session, project);
       // compare
       if (lastChecksum == null || !newChecksum.equals(lastChecksum))
       {
@@ -83,7 +86,7 @@ public class ChecksumTargetPlatformConfigurationChangeDiscoverer implements Targ
       }
    }
 
-   private String computeProjectChecksum(File statusCacheDir, MavenProject project)
+   private String computeProjectChecksum(File statusCacheDir, MavenSession session, MavenProject project)
    {
       final List<MavenProject> projects = new ArrayList<MavenProject>();
       projects.add(project);
@@ -95,7 +98,7 @@ public class ChecksumTargetPlatformConfigurationChangeDiscoverer implements Targ
          parent = parent.getParent();
       }
 
-      return computeProjectsChecksum(statusCacheDir, projects);
+      return computeProjectsChecksum(statusCacheDir, session, projects);
    }
 
    private String getDefaultEncoding(MavenProject project)
@@ -103,20 +106,21 @@ public class ChecksumTargetPlatformConfigurationChangeDiscoverer implements Targ
       return project.getProperties().getProperty("project.build.sourceEncoding", Charset.defaultCharset().name());
    }
 
-   private String computeProjectsChecksum(File statusCacheDir, List<MavenProject> projects)
+   private String computeProjectsChecksum(File statusCacheDir, MavenSession session, List<MavenProject> projects)
    {
       final StringBuilder sb = new StringBuilder();
       for (final MavenProject project : projects)
       {
-         final List<File> files = configFilesDiscoverer.getTargetPlatformConfigurationFiles(project);
+         final List<File> files = getTPFilesDiscoverer(session, project).getTargetPlatformConfigurationFiles(session,
+            project);
          for (final File file : files)
          {
             final String encoding = detectEncoding(project, file);
             final String hash = calculateHash(file, encoding);
             final String path = PathUtils.getRelativePath(file, new File("").getAbsoluteFile(), "/");
-            
+
             dump(statusCacheDir, path, encoding, hash);
-            
+
             sb.append(hash);
          }
       }
@@ -129,6 +133,16 @@ public class ChecksumTargetPlatformConfigurationChangeDiscoverer implements Targ
       {
          throw Exceptions.pipe(e);
       }
+   }
+
+   private TargetPlatformConfigurationFilesDiscoverer getTPFilesDiscoverer(MavenSession session, MavenProject project)
+   {
+      final String tool = ToolUtils.getTool(session, project);
+      if (tool == null)
+      {
+         throw new IllegalStateException("Property tpmp.tool is not set");
+      }
+      return configFilesDiscovererMap.get(tool);
    }
 
    private void dump(File statusCacheDir, String path, String encoding, String hash)
@@ -151,7 +165,7 @@ public class ChecksumTargetPlatformConfigurationChangeDiscoverer implements Targ
             throw Exceptions.pipe(e);
          }
       }
-      properties.put(path + "@" +  encoding, hash);
+      properties.put(path + "@" + encoding, hash);
       properties.store(checksumFile);
    }
 

@@ -14,6 +14,7 @@ import java.util.Map;
 import javax.inject.Inject;
 import javax.inject.Named;
 
+import org.apache.maven.execution.MavenSession;
 import org.apache.maven.project.MavenProject;
 import org.eclipse.tycho.core.TychoProject;
 import org.eclipse.tycho.core.osgitools.EclipseApplicationProject;
@@ -25,7 +26,7 @@ import org.eclipse.tycho.model.Feature;
 import org.eclipse.tycho.model.UpdateSite;
 import org.sourcepit.tpmp.change.TargetPlatformConfigurationFilesDiscoverer;
 
-@Named
+@Named("Tycho")
 public class TychoTargetPlatformConfigurationFilesDiscoverer implements TargetPlatformConfigurationFilesDiscoverer
 {
    private final Map<String, TychoProject> projectTypes;
@@ -36,7 +37,7 @@ public class TychoTargetPlatformConfigurationFilesDiscoverer implements TargetPl
       this.projectTypes = projectTypes;
    }
 
-   public List<File> getTargetPlatformConfigurationFiles(MavenProject project)
+   public List<File> getTargetPlatformConfigurationFiles(MavenSession session, MavenProject project)
    {
       final List<File> files = new ArrayList<File>();
       files.add(project.getFile());

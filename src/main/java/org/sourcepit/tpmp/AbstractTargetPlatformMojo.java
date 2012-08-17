@@ -19,11 +19,11 @@ import org.apache.maven.project.MavenProject;
 import org.apache.maven.repository.RepositorySystem;
 import org.slf4j.Logger;
 import org.sourcepit.common.utils.lang.Exceptions;
-import org.sourcepit.common.utils.path.PathUtils;
 import org.sourcepit.common.utils.zip.ZipProcessingRequest;
 import org.sourcepit.common.utils.zip.ZipProcessor;
 import org.sourcepit.tpmp.change.TargetPlatformConfigurationChangeDiscoverer;
 import org.sourcepit.tpmp.ee.ExecutionEnvironmentSelector;
+import org.sourcepit.tpmp.resolver.TargetPlatformConfigurationHandler;
 import org.sourcepit.tpmp.resolver.TargetPlatformResolutionHandler;
 import org.sourcepit.tpmp.resolver.TargetPlatformResolver;
 
@@ -96,25 +96,34 @@ public abstract class AbstractTargetPlatformMojo extends AbstractGuplexedMojo
    protected void updateTargetPlatform(final MavenProject project, final File platformDir)
    {
       final CopyTargetPlatformResolutionHandler resolutionHandler = new CopyTargetPlatformResolutionHandler(platformDir);
+      resolveTargetPlatformConfiguration(session, resolutionHandler);
       resolveTargetPlatform(session, getMetadataDir(platformDir), resolutionHandler);
 
       final String executionEnvironment = selectExecutionEnvironment(resolutionHandler.getExecutionEnvironments());
       writeDefinitions(project, platformDir, executionEnvironment, resolutionHandler.getTargetEnvironments());
    }
 
-   protected void resolveTargetPlatform(MavenSession session, File metadataDir,
+   private void resolveTargetPlatformConfiguration(MavenSession session, TargetPlatformConfigurationHandler handler)
+   {
+      for (MavenProject project : session.getProjects())
+      {
+         tpResolver.resolveTargetPlatformConfiguration(session, project, handler);
+      }
+   }
+
+   private void resolveTargetPlatform(MavenSession session, File metadataDir,
       final TargetPlatformResolutionHandler handler)
    {
       for (MavenProject project : session.getProjects())
       {
-         resolveTargetPlatform(project, metadataDir, handler);
+         resolveTargetPlatform(session, project, metadataDir, handler);
       }
    }
 
-   private void resolveTargetPlatform(MavenProject project, File metadataDir,
+   private void resolveTargetPlatform(MavenSession session, MavenProject project, File metadataDir,
       final TargetPlatformResolutionHandler handler) throws Error
    {
-      if (isResolutionRequired(metadataDir, project))
+      if (isResolutionRequired(metadataDir, session, project))
       {
          getLogger().info("Materializing target platform of project " + project.getId());
          try
@@ -138,9 +147,9 @@ public abstract class AbstractTargetPlatformMojo extends AbstractGuplexedMojo
       }
    }
 
-   private boolean isResolutionRequired(File metadataDir, MavenProject project)
+   private boolean isResolutionRequired(File metadataDir, MavenSession session, MavenProject project)
    {
-      if (changeDiscoverer.hasTargetPlatformConfigurationChanged(metadataDir, project))
+      if (changeDiscoverer.hasTargetPlatformConfigurationChanged(metadataDir, session, project))
       {
          return true;
       }
@@ -156,13 +165,7 @@ public abstract class AbstractTargetPlatformMojo extends AbstractGuplexedMojo
 
          final File targetFile = new File(parentDir, platformName + ".target");
 
-         String relativePath = PathUtils.getRelativePath(targetFile.getParentFile(), parentDir, "/");
-         if (relativePath == null || relativePath.length() == 0)
-         {
-            relativePath = ".";
-         }
-
-         new TargetPlatformWriter().write(targetFile, platformName, relativePath, targetEnvironment,
+         new TargetPlatformWriter().write(targetFile, platformName, parentDir.getAbsolutePath(), targetEnvironment,
             executionEnvironment);
       }
    }

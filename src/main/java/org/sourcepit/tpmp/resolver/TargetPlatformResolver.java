@@ -12,5 +12,8 @@ import org.apache.maven.project.MavenProject;
 
 public interface TargetPlatformResolver
 {
+   void resolveTargetPlatformConfiguration(MavenSession session, MavenProject project,
+      TargetPlatformConfigurationHandler handler);
+
    void resolveTargetPlatform(MavenSession session, MavenProject project, TargetPlatformResolutionHandler handler);
 }

@@ -51,6 +51,7 @@ import org.eclipse.tycho.core.utils.TychoProjectUtils;
 import org.eclipse.tycho.resolver.TychoDependencyResolver;
 import org.sourcepit.common.utils.io.IOOperation;
 import org.sourcepit.common.utils.xml.XmlUtils;
+import org.sourcepit.tpmp.resolver.TargetPlatformConfigurationHandler;
 import org.sourcepit.tpmp.resolver.TargetPlatformResolutionHandler;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -76,16 +77,13 @@ public class TychoTargetPlatformResolver implements org.sourcepit.tpmp.resolver.
 
    @Inject
    private TychoDependencyResolver resolver;
-
-   public void resolveTargetPlatform(MavenSession session, MavenProject project, TargetPlatformResolutionHandler handler)
+   
+   public void resolveTargetPlatformConfiguration(MavenSession session, MavenProject project, TargetPlatformConfigurationHandler handler)
    {
       if (!(projectTypes.get(project.getPackaging()) instanceof TychoProject))
       {
          return;
       }
-
-      final List<Dependency> dependencies = new ArrayList<Dependency>();
-      final Set<String> explodedBundles = new HashSet<String>();
 
       final TargetPlatformConfiguration configuration = getTargetPlatformConfiguration(session, project);
 
@@ -99,7 +97,19 @@ public class TychoTargetPlatformResolver implements org.sourcepit.tpmp.resolver.
       {
          handler.handleExecutionEnvironment(ee);
       }
+   }
 
+   public void resolveTargetPlatform(MavenSession session, MavenProject project, TargetPlatformResolutionHandler handler)
+   {
+      if (!(projectTypes.get(project.getPackaging()) instanceof TychoProject))
+      {
+         return;
+      }
+
+      final TargetPlatformConfiguration configuration = getTargetPlatformConfiguration(session, project);
+
+      final List<Dependency> dependencies = new ArrayList<Dependency>();
+      final Set<String> explodedBundles = new HashSet<String>();
       dependencies.addAll(configuration.getDependencyResolverConfiguration().getExtraRequirements());
 
       final TychoSurefirePluginConfiguration surefirePluginConfiguration = new TychoSurefirePluginConfigurationReader()

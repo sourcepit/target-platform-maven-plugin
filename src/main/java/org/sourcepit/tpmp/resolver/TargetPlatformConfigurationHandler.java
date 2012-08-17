@@ -5,14 +5,9 @@
  */
 
 package org.sourcepit.tpmp.resolver;
-
-import java.io.File;
-
-import org.apache.maven.project.MavenProject;
-
-public interface TargetPlatformResolutionHandler
+public interface TargetPlatformConfigurationHandler
 {
-   void handleFeature(String id, String version, File location, MavenProject mavenProject);
-
-   void handlePlugin(String id, String version, File location, boolean unpack, MavenProject mavenProject);
+   void handleTargetEnvironment(String os, String ws, String arch, String nl);
+   
+   void handleExecutionEnvironment(String ee);
 }

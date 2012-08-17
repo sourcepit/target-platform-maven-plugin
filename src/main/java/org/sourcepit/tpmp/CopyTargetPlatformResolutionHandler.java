@@ -18,9 +18,10 @@ import org.apache.maven.project.MavenProject;
 import org.sourcepit.common.utils.lang.Exceptions;
 import org.sourcepit.common.utils.zip.ZipProcessingRequest;
 import org.sourcepit.common.utils.zip.ZipProcessor;
+import org.sourcepit.tpmp.resolver.TargetPlatformConfigurationHandler;
 import org.sourcepit.tpmp.resolver.TargetPlatformResolutionHandler;
 
-public class CopyTargetPlatformResolutionHandler implements TargetPlatformResolutionHandler
+public class CopyTargetPlatformResolutionHandler implements TargetPlatformResolutionHandler, TargetPlatformConfigurationHandler
 {
    private final Collection<String> executionEnvironments = new LinkedHashSet<String>();
    private final Collection<TargetEnvironment> targetEnvironments = new LinkedHashSet<TargetEnvironment>();

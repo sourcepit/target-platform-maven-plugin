@@ -49,7 +49,7 @@ public class MaterializeTargetPlatformMojo extends AbstractTargetPlatformMojo
    protected void doExecute()
    {
       final MavenProject project = session.getCurrentProject();
-
+      
       final File platformDir = getPlatformDir(project);
       updateTargetPlatform(project, platformDir);
 

@@ -9,9 +9,10 @@ package org.sourcepit.tpmp.change;
 import java.io.File;
 import java.util.List;
 
+import org.apache.maven.execution.MavenSession;
 import org.apache.maven.project.MavenProject;
 
 public interface TargetPlatformConfigurationFilesDiscoverer
 {
-   List<File> getTargetPlatformConfigurationFiles(MavenProject project);
+   List<File> getTargetPlatformConfigurationFiles(MavenSession session, MavenProject project);
 }
