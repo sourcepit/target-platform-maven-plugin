@@ -15,5 +15,6 @@ public interface TargetPlatformResolver
    void resolveTargetPlatformConfiguration(MavenSession session, MavenProject project,
       TargetPlatformConfigurationHandler handler);
 
-   void resolveTargetPlatform(MavenSession session, MavenProject project, TargetPlatformResolutionHandler handler);
+   void resolveTargetPlatform(MavenSession session, MavenProject project, boolean includeSource,
+      TargetPlatformResolutionHandler handler);
 }

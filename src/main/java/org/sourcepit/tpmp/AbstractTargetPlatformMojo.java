@@ -38,6 +38,9 @@ public abstract class AbstractTargetPlatformMojo extends AbstractGuplexedMojo
    /** @parameter expression="${tpmp.forceUpdate}" default-value="false" */
    private boolean forceUpdate;
 
+   /** @parameter expression="${tpmp.includeSource}" default-value="true" */
+   private boolean includeSource;
+
    /** @parameter expression="${tpmp.classifier}" default-value="target" */
    protected String classifier;
 
@@ -128,7 +131,7 @@ public abstract class AbstractTargetPlatformMojo extends AbstractGuplexedMojo
          getLogger().info("Materializing target platform of project " + project.getId());
          try
          {
-            tpResolver.resolveTargetPlatform(session, project, handler);
+            tpResolver.resolveTargetPlatform(session, project, includeSource, handler);
          }
          catch (RuntimeException e)
          {

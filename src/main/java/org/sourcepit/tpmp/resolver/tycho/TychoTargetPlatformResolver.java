@@ -123,7 +123,8 @@ public class TychoTargetPlatformResolver implements org.sourcepit.tpmp.resolver.
       }
    }
 
-   public void resolveTargetPlatform(MavenSession session, MavenProject project, TargetPlatformResolutionHandler handler)
+   public void resolveTargetPlatform(MavenSession session, MavenProject project, boolean includeSource,
+      TargetPlatformResolutionHandler handler)
    {
       if (!(projectTypes.get(project.getPackaging()) instanceof TychoProject))
       {
@@ -134,7 +135,10 @@ public class TychoTargetPlatformResolver implements org.sourcepit.tpmp.resolver.
 
       final TargetPlatform targetPlatform = doResolveTargetPlatform(session, project, contentCollector);
 
-      resolveSources(targetPlatform, contentCollector, handler);
+      if (includeSource)
+      {
+         resolveSources(targetPlatform, contentCollector, handler);
+      }
    }
 
    private void resolveSources(final TargetPlatform targetPlatform, final ContentCollector contentCollector,
@@ -153,11 +157,6 @@ public class TychoTargetPlatformResolver implements org.sourcepit.tpmp.resolver.
          {
             final String symbolicName = getSymbolicName(unit);
             final String version = getVersion(unit);
-
-            if (symbolicName.startsWith("org.eclipse.core.resource"))
-            {
-               System.out.println();
-            }
 
             final BundleManifest manifest = getManifest(unit);
 
