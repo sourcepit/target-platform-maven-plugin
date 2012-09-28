@@ -120,6 +120,11 @@
 			<version>0.15.0</version>
 		</dependency>
 		<dependency>
+			<groupId>org.eclipse.tycho</groupId>
+			<artifactId>tycho-p2-facade</artifactId>
+			<version>0.15.0</version>
+		</dependency>
+		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 			<scope>test</scope>
@@ -230,6 +235,18 @@
 						<id>install-base</id>
 						<goals>
 							<goal>install</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.codehaus.plexus</groupId>
+				<artifactId>plexus-component-metadata</artifactId>
+				<executions>
+					<execution>
+						<id>generate</id>
+						<goals>
+							<goal>generate-metadata</goal>
 						</goals>
 					</execution>
 				</executions>

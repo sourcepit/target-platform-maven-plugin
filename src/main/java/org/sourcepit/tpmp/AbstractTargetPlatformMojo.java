@@ -26,6 +26,7 @@ import org.sourcepit.tpmp.ee.ExecutionEnvironmentSelector;
 import org.sourcepit.tpmp.resolver.TargetPlatformConfigurationHandler;
 import org.sourcepit.tpmp.resolver.TargetPlatformResolutionHandler;
 import org.sourcepit.tpmp.resolver.TargetPlatformResolver;
+import org.sourcepit.tpmp.resolver.tycho.TychoSessionTargetPlatformResolver;
 
 public abstract class AbstractTargetPlatformMojo extends AbstractGuplexedMojo
 {
@@ -96,11 +97,16 @@ public abstract class AbstractTargetPlatformMojo extends AbstractGuplexedMojo
       return platformArtifact;
    }
 
+   @Inject
+   TychoSessionTargetPlatformResolver sessionResolver;
+
    protected void updateTargetPlatform(final MavenProject project, final File platformDir)
    {
       final CopyTargetPlatformResolutionHandler resolutionHandler = new CopyTargetPlatformResolutionHandler(platformDir);
-      resolveTargetPlatformConfiguration(session, resolutionHandler);
-      resolveTargetPlatform(session, getMetadataDir(platformDir), resolutionHandler);
+      sessionResolver.resolve(session, true, resolutionHandler, resolutionHandler);
+
+      // resolveTargetPlatformConfiguration(session, resolutionHandler);
+      // resolveTargetPlatform(session, getMetadataDir(platformDir), resolutionHandler);
 
       final String executionEnvironment = selectExecutionEnvironment(resolutionHandler.getExecutionEnvironments());
       writeDefinitions(project, platformDir, executionEnvironment, resolutionHandler.getTargetEnvironments());
