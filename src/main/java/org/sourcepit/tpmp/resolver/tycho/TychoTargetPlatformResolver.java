@@ -137,13 +137,19 @@ public class TychoTargetPlatformResolver implements org.sourcepit.tpmp.resolver.
 
       if (includeSource)
       {
-         resolveSources(targetPlatform, contentCollector, handler);
+         resolveSources(session, targetPlatform, contentCollector, handler);
       }
    }
 
-   private void resolveSources(final TargetPlatform targetPlatform, final ContentCollector contentCollector,
-      TargetPlatformResolutionHandler handler)
+   private void resolveSources(MavenSession session, final TargetPlatform targetPlatform,
+      final ContentCollector contentCollector, TargetPlatformResolutionHandler handler)
    {
+      final Map<File, MavenProject> projectsMap = new HashMap<File, MavenProject>();
+      for (MavenProject mavenProject : session.getProjects())
+      {
+         projectsMap.put(mavenProject.getBasedir(), mavenProject);
+      }
+
       final P2ResolverFactory factory = equinox.getService(P2ResolverFactory.class);
       final P2Resolver resolver = factory.createResolver(new MavenLoggerAdapter(logger, false));
 
@@ -179,7 +185,8 @@ public class TychoTargetPlatformResolver implements org.sourcepit.tpmp.resolver.
                      final File location = entry.getLocation();
                      if (location != null && location.exists())
                      {
-                        handler.handlePlugin(symbolicName, version, location, false, null);
+                        handler.handlePlugin(entry.getId(), entry.getVersion(), location, false,
+                           projectsMap.get(location));
                      }
                   }
                }
