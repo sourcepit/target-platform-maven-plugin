@@ -399,8 +399,8 @@ public class TychoSessionTargetPlatformResolver
       TargetPlatformResolutionHandler resolutionHandler, final LinkedHashSet<String> explodedBundles,
       final LinkedHashSet<Dependency> frameworkExtensions)
    {
-      final List<ReactorProject> reactorProjects = new ArrayList<ReactorProject>(DefaultReactorProject.adapt(session));
-      reactorProjects.remove(DefaultReactorProject.adapt(session.getCurrentProject()));
+      final List<ReactorProject> reactorProjects = new ArrayList<ReactorProject>();
+      reactorProjects.add(DefaultReactorProject.adapt(project));
 
       final TargetPlatformResolver platformResolver = targetPlatformResolverLocator.lookupPlatformResolver(project);
 
@@ -644,7 +644,7 @@ public class TychoSessionTargetPlatformResolver
             }
          }
       }
-      
+
       fake.setContextValue("tpmp.aggregatedMetadata", metadata);
 
       return fake;
