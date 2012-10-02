@@ -6,7 +6,6 @@
 
 package org.sourcepit.tpmp.resolver.tycho;
 
-import static com.google.common.base.Optional.fromNullable;
 import static org.sourcepit.common.utils.io.IOResources.osgiIn;
 
 import java.io.File;
@@ -14,7 +13,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -40,15 +38,11 @@ import org.eclipse.tycho.artifacts.TargetPlatform;
 import org.eclipse.tycho.core.DependencyResolverConfiguration;
 import org.eclipse.tycho.core.TargetPlatformConfiguration;
 import org.eclipse.tycho.core.TargetPlatformResolver;
-import org.eclipse.tycho.core.TychoConstants;
 import org.eclipse.tycho.core.TychoProject;
 import org.eclipse.tycho.core.osgitools.BundleReader;
-import org.eclipse.tycho.core.osgitools.DefaultReactorProject;
 import org.eclipse.tycho.core.osgitools.OsgiManifest;
 import org.eclipse.tycho.core.resolver.DefaultTargetPlatformResolverFactory;
 import org.eclipse.tycho.core.resolver.shared.OptionalResolutionAction;
-import org.eclipse.tycho.core.utils.TychoProjectUtils;
-import org.eclipse.tycho.resolver.TychoDependencyResolver;
 import org.sourcepit.common.utils.io.IOOperation;
 import org.sourcepit.common.utils.xml.XmlUtils;
 import org.sourcepit.tpmp.resolver.TargetPlatformResolutionHandler;
@@ -62,7 +56,7 @@ import com.google.common.base.Optional;
 public class AbstractTychoTargetPlatformResolver
 {
    @Inject
-   private Map<String, TychoProject> projectTypes;
+   private MavenProjectFacade projectFacade;
 
    @Inject
    private DefaultTargetPlatformResolverFactory targetPlatformResolverLocator;
@@ -75,9 +69,6 @@ public class AbstractTychoTargetPlatformResolver
 
    @Inject
    private BundleReader bundleReader;
-
-   @Inject
-   private TychoDependencyResolver resolver;
 
    @Inject
    private TychoSourceIUResolver sourceResolver;
@@ -132,24 +123,13 @@ public class AbstractTychoTargetPlatformResolver
       final Set<String> explodedBundles, TargetPlatformResolutionHandler resolutionHandler)
    {
       // map original rector projects to their versioned id. needed to recognize and re-map reactor artifacts later
-      final Map<String, MavenProject> vidToProjectMap = new HashMap<String, MavenProject>();
-      for (MavenProject mavenProject : session.getProjects())
-      {
-         final TychoProject tychoProject = getTychoProject(mavenProject);
-         if (tychoProject != null)
-         {
-            final ReactorProject reactorProject = DefaultReactorProject.adapt(mavenProject);
-            final ArtifactKey artifactKey = tychoProject.getArtifactKey(reactorProject);
-            final String vid = artifactKey.getId() + "_" + artifactKey.getVersion();
-            vidToProjectMap.put(vid, mavenProject);
-         }
-      }
+      final Map<String, MavenProject> vidToProjectMap = projectFacade.createVidToProjectMap(session);
 
       for (ArtifactDescriptor artifact : platformArtifacts.getArtifacts(ArtifactKey.TYPE_ECLIPSE_FEATURE))
       {
-         final Optional<MavenProject> mavenProject = getMavenProject(vidToProjectMap, artifact);
+         final Optional<MavenProject> mavenProject = projectFacade.getMavenProject(vidToProjectMap, artifact);
 
-         final File location = getLocation(artifact, mavenProject);
+         final File location = projectFacade.getLocation(artifact, mavenProject);
 
          // due to the feature model of Tycho violates the specified behaviour of the "unpack" attribute, we have to
          // parse the feature.xml on our own. See https://bugs.eclipse.org/bugs/show_bug.cgi?id=386851.
@@ -159,53 +139,27 @@ public class AbstractTychoTargetPlatformResolver
             final Element plugin = (Element) pluginNode;
             if (isUnpack(plugin))
             {
-
                explodedBundles.add(getId(plugin));
             }
          }
 
-         final ArtifactKey key = getArtifactKey(artifact, mavenProject);
+         final ArtifactKey key = projectFacade.getArtifactKey(artifact, mavenProject);
          resolutionHandler.handleFeature(key.getId(), key.getVersion(), location, mavenProject.orNull());
       }
 
       for (ArtifactDescriptor artifact : platformArtifacts.getArtifacts())
       {
-         final Optional<MavenProject> mavenProject = getMavenProject(vidToProjectMap, artifact);
+         final Optional<MavenProject> mavenProject = projectFacade.getMavenProject(vidToProjectMap, artifact);
 
-         final ArtifactKey key = getArtifactKey(artifact, mavenProject);
+         final ArtifactKey key = projectFacade.getArtifactKey(artifact, mavenProject);
          final String type = key.getType();
          if (ArtifactKey.TYPE_ECLIPSE_PLUGIN.equals(type) || ArtifactKey.TYPE_ECLIPSE_TEST_PLUGIN.equals(type))
          {
-            final boolean explodedBundle = isExplodedBundle(key.getId(), getLocation(artifact, mavenProject),
-               explodedBundles);
-            resolutionHandler.handlePlugin(key.getId(), key.getVersion(), getLocation(artifact, mavenProject),
-               explodedBundle, mavenProject.orNull());
+            final boolean explodedBundle = isExplodedBundle(key.getId(),
+               projectFacade.getLocation(artifact, mavenProject), explodedBundles);
+            resolutionHandler.handlePlugin(key.getId(), key.getVersion(),
+               projectFacade.getLocation(artifact, mavenProject), explodedBundle, mavenProject.orNull());
          }
-      }
-   }
-
-   private ArtifactKey getArtifactKey(ArtifactDescriptor artifact, Optional<MavenProject> mavenProject)
-   {
-      if (mavenProject.isPresent())
-      {
-         final MavenProject mp = mavenProject.get();
-         return getTychoProject(mp).getArtifactKey(DefaultReactorProject.adapt(mp));
-      }
-      else
-      {
-         return artifact.getKey();
-      }
-   }
-
-   private static File getLocation(ArtifactDescriptor artifact, Optional<MavenProject> mavenProject)
-   {
-      if (mavenProject.isPresent())
-      {
-         return mavenProject.get().getBasedir();
-      }
-      else
-      {
-         return artifact.getLocation();
       }
    }
 
@@ -267,14 +221,6 @@ public class AbstractTychoTargetPlatformResolver
       return files;
    }
 
-   private Optional<MavenProject> getMavenProject(final Map<String, MavenProject> projectsMap,
-      ArtifactDescriptor artifact)
-   {
-      final ArtifactKey artifactKey = artifact.getKey();
-      final String vid = artifactKey.getId() + "_" + artifactKey.getVersion();
-      return fromNullable(projectsMap.get(vid));
-   }
-
    private boolean isUnpack(final Element plugin)
    {
       if (!plugin.hasAttribute("unpack"))
@@ -309,58 +255,36 @@ public class AbstractTychoTargetPlatformResolver
 
    protected TychoProject getTychoProject(MavenProject project)
    {
-      return projectTypes.get(project.getPackaging());
+      return projectFacade.getTychoProject(project);
    }
 
    protected TargetPlatformConfiguration getTargetPlatformConfiguration(MavenSession session, MavenProject project)
    {
-      setupSessionLazy(session);
-      return TychoProjectUtils.getTargetPlatformConfiguration(project);
+      return projectFacade.getTargetPlatformConfiguration(session, project);
    }
-
-   private void setupSessionLazy(MavenSession session)
-   {
-      List<MavenProject> projects = session.getProjects();
-      for (MavenProject project : projects)
-      {
-         setupProjectLazy(session, project);
-      }
-   }
-
-   private void setupProjectLazy(MavenSession session, MavenProject project)
-   {
-      final TargetPlatformConfiguration targetPlatformConfiguration = (TargetPlatformConfiguration) project
-         .getContextValue(TychoConstants.CTX_TARGET_PLATFORM_CONFIGURATION);
-      if (targetPlatformConfiguration == null)
-      {
-         // project was not set up by Tycho. Maybe running in -Dtycho.mode=maven
-         resolver.setupProject(session, project, DefaultReactorProject.adapt(project));
-      }
-   }
-
 
    protected static class ContentCollector implements TargetPlatformResolutionHandler
    {
       private final TargetPlatformResolutionHandler delegate;
-   
+
       private final Set<String> plugins = new LinkedHashSet<String>();
-   
+
       public ContentCollector(TargetPlatformResolutionHandler delegate)
       {
          this.delegate = delegate;
       }
-   
+
       public void handleFeature(String id, String version, File location, MavenProject mavenProject)
       {
          delegate.handleFeature(id, version, location, mavenProject);
       }
-   
+
       public void handlePlugin(String id, String version, File location, boolean unpack, MavenProject mavenProject)
       {
          plugins.add(id + "_" + version);
          delegate.handlePlugin(id, version, location, unpack, mavenProject);
       }
-   
+
       public Set<String> getPlugins()
       {
          return plugins;

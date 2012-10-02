@@ -25,7 +25,7 @@ public class TpmpIT extends ExternalMavenTest
    @Override
    protected boolean isDebug()
    {
-      return false;
+      return true;
    }
 
    @Override
