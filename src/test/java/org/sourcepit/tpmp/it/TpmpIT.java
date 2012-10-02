@@ -13,6 +13,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.FileFilter;
+import java.io.IOException;
 
 import org.apache.commons.io.FileUtils;
 import org.junit.Test;
@@ -34,11 +35,23 @@ public class TpmpIT extends ExternalMavenTest
    }
 
    @Test
-   public void testReactor() throws Exception
+   public void testReactor_PerSession() throws Exception
+   {
+      testReactor("per-session");
+   }
+
+   @Test
+   public void testReactor_PerProject() throws Exception
+   {
+      testReactor("per-project");
+   }
+
+   private void testReactor(String strategy) throws IOException
    {
       final String projectVersion = getEnvironment().getProperty("project.version");
       final File projectDir = getResource("tycho-reactor");
-      build(projectDir, "-e", "-B", "org.sourcepit:target-platform-maven-plugin:" + projectVersion + ":materialize");
+      build(projectDir, "-e", "-B", "org.sourcepit:target-platform-maven-plugin:" + projectVersion + ":materialize",
+         "-Dtpmp.resolutionStrategy=" + strategy);
 
       final File platformDir = getPlatformDir(projectDir);
       assertTrue(platformDir.exists());
@@ -70,12 +83,23 @@ public class TpmpIT extends ExternalMavenTest
    }
 
    @Test
-   public void testReactorTychoModeMaven() throws Exception
+   public void testReactorTychoModeMaven_PerSession() throws Exception
+   {
+      testReactorTychoModeMaven("per-session");
+   }
+
+   @Test
+   public void testReactorTychoModeMaven_PerProject() throws Exception
+   {
+      testReactorTychoModeMaven("per-project");
+   }
+
+   private void testReactorTychoModeMaven(String strategy) throws IOException
    {
       final String projectVersion = getEnvironment().getProperty("project.version");
       final File projectDir = getResource("tycho-reactor");
       build(projectDir, "-Dtycho.mode=maven", "-e", "-B", "clean", "org.sourcepit:target-platform-maven-plugin:"
-         + projectVersion + ":materialize");
+         + projectVersion + ":materialize", "-Dtpmp.resolutionStrategy=" + strategy);
 
       final File platformDir = getPlatformDir(projectDir);
       assertTrue(platformDir.exists());
@@ -104,7 +128,7 @@ public class TpmpIT extends ExternalMavenTest
    @Test
    public void testTargetPlatformConfigurationNotChanged() throws Exception
    {
-      testReactorTychoModeMaven();
+      testReactorTychoModeMaven("per-project");
 
       final String projectVersion = getEnvironment().getProperty("project.version");
       final File projectDir = new File(getWs().getRoot(), "tycho-reactor");
@@ -126,24 +150,35 @@ public class TpmpIT extends ExternalMavenTest
       FileUtils.forceDelete(pluginsDir);
 
       build(projectDir, "-Dtycho.mode=maven", "-e", "-B", "org.sourcepit:target-platform-maven-plugin:"
-         + projectVersion + ":materialize");
+         + projectVersion + ":materialize", "-Dtpmp.resolutionStrategy=per-project");
 
       assertFalse(featuresDir.exists());
       assertFalse(pluginsDir.exists());
    }
 
    @Test
-   public void testTestPlugin() throws Exception
+   public void testTestPlugin_PerSession() throws Exception
+   {
+      testTestPlugin("per-session");
+   }
+
+   @Test
+   public void testTestPlugin_PerProject() throws Exception
+   {
+      testTestPlugin("per-project");
+   }
+
+   private void testTestPlugin(String strategy) throws IOException
    {
       final String projectVersion = getEnvironment().getProperty("project.version");
 
       final File reactorDir = getResource("tycho-reactor");
 
-      final File projectDir = new File(reactorDir, "org.sourcepit.tpmp.tests");
-      build(projectDir, "-e", "-B", "clean", "org.sourcepit:target-platform-maven-plugin:" + projectVersion
-         + ":materialize");
+      build(reactorDir, "--projects", "org.sourcepit.tpmp.tests,org.sourcepit.tpmp", "-e", "-B", "clean",
+         "org.sourcepit:target-platform-maven-plugin:" + projectVersion + ":materialize", "-Dtpmp.resolutionStrategy="
+            + strategy);
 
-      final File platformDir = getPlatformDir(projectDir);
+      final File platformDir = getPlatformDir(new File(reactorDir, "org.sourcepit.tpmp"));
       assertTrue(platformDir.exists());
 
       final File featuresDir = new File(platformDir, "features");
@@ -168,7 +203,18 @@ public class TpmpIT extends ExternalMavenTest
    }
 
    @Test
-   public void testPlugin() throws Exception
+   public void testPlugin_PerSession() throws Exception
+   {
+      testPlugin("per-session");
+   }
+
+   @Test
+   public void testPlugin_PerProject() throws Exception
+   {
+      testPlugin("per-project");
+   }
+
+   private void testPlugin(String strategy) throws IOException
    {
       final String projectVersion = getEnvironment().getProperty("project.version");
 
@@ -176,7 +222,7 @@ public class TpmpIT extends ExternalMavenTest
 
       final File projectDir = new File(reactorDir, "org.sourcepit.tpmp");
       build(projectDir, "-e", "-B", "clean", "org.sourcepit:target-platform-maven-plugin:" + projectVersion
-         + ":materialize");
+         + ":materialize", "-Dtpmp.resolutionStrategy=" + strategy);
 
       final File platformDir = getPlatformDir(projectDir);
       assertTrue(platformDir.exists());

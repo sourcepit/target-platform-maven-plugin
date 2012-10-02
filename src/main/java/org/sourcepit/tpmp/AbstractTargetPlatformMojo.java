@@ -9,6 +9,7 @@ package org.sourcepit.tpmp;
 import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
+import java.util.Map;
 
 import javax.inject.Inject;
 
@@ -17,14 +18,10 @@ import org.apache.maven.artifact.resolver.ArtifactResolutionRequest;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.repository.RepositorySystem;
-import org.slf4j.Logger;
 import org.sourcepit.common.utils.lang.Exceptions;
 import org.sourcepit.common.utils.zip.ZipProcessingRequest;
 import org.sourcepit.common.utils.zip.ZipProcessor;
-import org.sourcepit.tpmp.change.TargetPlatformConfigurationChangeDiscoverer;
 import org.sourcepit.tpmp.ee.ExecutionEnvironmentSelector;
-import org.sourcepit.tpmp.resolver.TargetPlatformConfigurationHandler;
-import org.sourcepit.tpmp.resolver.TargetPlatformResolutionHandler;
 import org.sourcepit.tpmp.resolver.TargetPlatformResolver;
 
 public abstract class AbstractTargetPlatformMojo extends AbstractGuplexedMojo
@@ -44,20 +41,17 @@ public abstract class AbstractTargetPlatformMojo extends AbstractGuplexedMojo
    /** @parameter expression="${tpmp.classifier}" default-value="target" */
    protected String classifier;
 
-   @Inject
-   private Logger logger;
+   /** @parameter expression="${tpmp.resolutionStrategy}" default-value="per-session" */
+   protected String resolutionStrategy;
 
    @Inject
    private RepositorySystem repositorySystem;
 
    @Inject
-   private TargetPlatformConfigurationChangeDiscoverer changeDiscoverer;
-
-   @Inject
-   private TargetPlatformResolver tpResolver;
-
-   @Inject
    private ExecutionEnvironmentSelector eeSelector;
+
+   @Inject
+   private Map<String, TargetPlatformResolver> resolverMap;
 
    private void download(MavenSession session, MavenProject project, File parentDir)
    {
@@ -98,65 +92,17 @@ public abstract class AbstractTargetPlatformMojo extends AbstractGuplexedMojo
 
    protected void updateTargetPlatform(final MavenProject project, final File platformDir)
    {
+      final TargetPlatformResolver resolver = resolverMap.get(resolutionStrategy);
+      if (resolver == null)
+      {
+         throw new IllegalStateException("No resolver available for strategy '" + resolutionStrategy + "'");
+      }
+
       final CopyTargetPlatformResolutionHandler resolutionHandler = new CopyTargetPlatformResolutionHandler(platformDir);
-      resolveTargetPlatformConfiguration(session, resolutionHandler);
-      resolveTargetPlatform(session, getMetadataDir(platformDir), resolutionHandler);
+      resolver.resolve(session, platformDir, includeSource, forceUpdate, resolutionHandler, resolutionHandler);
 
       final String executionEnvironment = selectExecutionEnvironment(resolutionHandler.getExecutionEnvironments());
       writeDefinitions(project, platformDir, executionEnvironment, resolutionHandler.getTargetEnvironments());
-   }
-
-   private void resolveTargetPlatformConfiguration(MavenSession session, TargetPlatformConfigurationHandler handler)
-   {
-      for (MavenProject project : session.getProjects())
-      {
-         tpResolver.resolveTargetPlatformConfiguration(session, project, handler);
-      }
-   }
-
-   private void resolveTargetPlatform(MavenSession session, File metadataDir,
-      final TargetPlatformResolutionHandler handler)
-   {
-      for (MavenProject project : session.getProjects())
-      {
-         resolveTargetPlatform(session, project, metadataDir, handler);
-      }
-   }
-
-   private void resolveTargetPlatform(MavenSession session, MavenProject project, File metadataDir,
-      final TargetPlatformResolutionHandler handler) throws Error
-   {
-      if (isResolutionRequired(metadataDir, session, project))
-      {
-         getLogger().info("Materializing target platform of project " + project.getId());
-         try
-         {
-            tpResolver.resolveTargetPlatform(session, project, includeSource, handler);
-         }
-         catch (RuntimeException e)
-         {
-            changeDiscoverer.clearTargetPlatformConfigurationStausCache(metadataDir, project);
-            throw e;
-         }
-         catch (Error e)
-         {
-            changeDiscoverer.clearTargetPlatformConfigurationStausCache(metadataDir, project);
-            throw e;
-         }
-      }
-      else
-      {
-         getLogger().info("Target platform of project " + project.getId() + " already materialized and up to date");
-      }
-   }
-
-   private boolean isResolutionRequired(File metadataDir, MavenSession session, MavenProject project)
-   {
-      if (changeDiscoverer.hasTargetPlatformConfigurationChanged(metadataDir, session, project))
-      {
-         return true;
-      }
-      return forceUpdate;
    }
 
    protected void writeDefinitions(MavenProject project, File parentDir, String executionEnvironment,
@@ -196,16 +142,6 @@ public abstract class AbstractTargetPlatformMojo extends AbstractGuplexedMojo
       return eeSelector.select(executionEnvironments);
    }
 
-   public Logger getLogger()
-   {
-      return logger;
-   }
-
-   public boolean isForceUpdate()
-   {
-      return forceUpdate;
-   }
-
    protected File getPlatformZipFile(MavenProject project)
    {
       return new File(targetDir, getClassifiedName(project) + ".zip");
@@ -239,11 +175,5 @@ public abstract class AbstractTargetPlatformMojo extends AbstractGuplexedMojo
          finalName = project.getArtifactId() + "-" + project.getVersion();
       }
       return finalName;
-   }
-
-
-   protected File getMetadataDir(final File platformDir)
-   {
-      return new File(platformDir, ".tpmp");
    }
 }

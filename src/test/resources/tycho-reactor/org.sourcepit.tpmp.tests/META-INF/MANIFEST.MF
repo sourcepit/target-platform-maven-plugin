@@ -4,4 +4,5 @@ Bundle-Name: Tests
 Bundle-SymbolicName: org.sourcepit.tpmp.tests
 Bundle-Version: 1.0.0.qualifier
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Require-Bundle: org.junit
+Require-Bundle: org.junit,
+ org.sourcepit.tpmp
