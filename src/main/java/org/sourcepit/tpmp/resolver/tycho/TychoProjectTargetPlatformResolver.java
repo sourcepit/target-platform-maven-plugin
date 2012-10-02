@@ -19,13 +19,14 @@ import org.apache.maven.project.MavenProject;
 import org.eclipse.tycho.core.TargetEnvironment;
 import org.eclipse.tycho.core.TargetPlatformConfiguration;
 import org.eclipse.tycho.core.osgitools.DefaultReactorProject;
+import org.sourcepit.tpmp.resolver.ProjectTargetPlatformResolver;
 import org.sourcepit.tpmp.resolver.TargetPlatformConfigurationHandler;
 import org.sourcepit.tpmp.resolver.TargetPlatformResolutionHandler;
 
 @Named
-public class TychoTargetPlatformResolver extends AbstractTychoTargetPlatformResolver
+public class TychoProjectTargetPlatformResolver extends AbstractTychoTargetPlatformResolver
    implements
-      org.sourcepit.tpmp.resolver.TargetPlatformResolver
+      ProjectTargetPlatformResolver
 {
    public void resolveTargetPlatformConfiguration(MavenSession session, MavenProject project,
       TargetPlatformConfigurationHandler handler)

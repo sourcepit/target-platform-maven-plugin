@@ -6,6 +6,7 @@
 
 package org.sourcepit.tpmp.resolver.tycho;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -40,15 +41,21 @@ import org.sourcepit.common.utils.props.PropertiesMap;
 import org.sourcepit.tpmp.ee.ExecutionEnvironmentSelector;
 import org.sourcepit.tpmp.resolver.TargetPlatformConfigurationHandler;
 import org.sourcepit.tpmp.resolver.TargetPlatformResolutionHandler;
+import org.sourcepit.tpmp.resolver.TargetPlatformResolver;
 
-@Named
+@Named("per-session")
 public class TychoSessionTargetPlatformResolver extends AbstractTychoTargetPlatformResolver
+   implements
+      TargetPlatformResolver
 {
    @Inject
    private ExecutionEnvironmentSelector eeSelector;
 
-   public void resolve(MavenSession session, boolean includeSource, TargetPlatformConfigurationHandler configHandler,
-      TargetPlatformResolutionHandler resolutionHandler)
+   /**
+    * {@inheritDoc}
+    */
+   public void resolve(MavenSession session, File platformDir, boolean includeSource, boolean forceUpdate,
+      TargetPlatformConfigurationHandler configHandler, TargetPlatformResolutionHandler resolutionHandler)
    {
       final TargetPlatformConfiguration aggregatedConfiguration = new TargetPlatformConfiguration();
       final LinkedHashSet<String> explodedBundles = new LinkedHashSet<String>();
@@ -106,7 +113,7 @@ public class TychoSessionTargetPlatformResolver extends AbstractTychoTargetPlatf
          tpmp.setGroupId(groupId);
          tpmp.setArtifactId(artifactId);
          tpmp.setVersion(version);
-         
+
          build.getPlugins().add(tpmp);
          build.flushPluginMap();
       }

@@ -6,13 +6,15 @@
 
 package org.sourcepit.tpmp.resolver;
 
-import java.io.File;
-
 import org.apache.maven.execution.MavenSession;
+import org.apache.maven.project.MavenProject;
 
 
-public interface TargetPlatformResolver
+public interface ProjectTargetPlatformResolver
 {
-   void resolve(MavenSession session, File platformDir, boolean includeSource, boolean forceUpdate,
-      TargetPlatformConfigurationHandler configHandler, TargetPlatformResolutionHandler resolutionHandler);
+   void resolveTargetPlatformConfiguration(MavenSession session, MavenProject project,
+      TargetPlatformConfigurationHandler handler);
+
+   void resolveTargetPlatform(MavenSession session, MavenProject project, boolean includeSource,
+      TargetPlatformResolutionHandler handler);
 }
