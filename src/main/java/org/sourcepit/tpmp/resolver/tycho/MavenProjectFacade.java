@@ -36,7 +36,7 @@ public class MavenProjectFacade
 {
    @Inject
    private Map<String, TychoProject> projectTypes;
-   
+
    @Inject
    private TychoDependencyResolver resolver;
 
@@ -61,19 +61,18 @@ public class MavenProjectFacade
       }
       return vidToProjectMap;
    }
-   
+
    public Optional<MavenProject> getMavenProject(final Map<String, MavenProject> projectsMap,
       ArtifactDescriptor artifact)
    {
       final ArtifactKey artifactKey = artifact.getKey();
-      final String vid = artifactKey.getId() + "_" + artifactKey.getVersion();
-      return fromNullable(projectsMap.get(vid));
+      return getMavenProject(projectsMap, artifactKey.getId(), artifactKey.getVersion());
    }
 
-   public Optional<MavenProject> getMavenProject(Map<String, MavenProject> projectsMap, Entry entry)
+   public Optional<MavenProject> getMavenProject(Map<String, MavenProject> projectsMap, String id, String version)
    {
-      final String vid = entry.getId() + "_" + entry.getVersion();
-      return fromNullable(projectsMap.get(vid));      
+      final String vid = id + "_" + version;
+      return fromNullable(projectsMap.get(vid));
    }
 
    public ArtifactKey getArtifactKey(ArtifactDescriptor artifact, Optional<MavenProject> mavenProject)
@@ -112,7 +111,7 @@ public class MavenProjectFacade
          return entry.getLocation();
       }
    }
-   
+
    public TargetPlatformConfiguration getTargetPlatformConfiguration(MavenSession session, MavenProject project)
    {
       setupSessionLazy(session);

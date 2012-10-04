@@ -100,7 +100,8 @@ public class TychoSourceIUResolver
 
                   for (Entry entry : result.getArtifacts())
                   {
-                     final Optional<MavenProject> mavenProject = projectFacade.getMavenProject(projectsMap, entry);
+                     final Optional<MavenProject> mavenProject = projectFacade.getMavenProject(projectsMap,
+                        targetIdAndVersion[0], targetIdAndVersion[1]);
                      final File location = projectFacade.getLocation(entry, mavenProject);
                      if (location != null && location.exists())
                      {
