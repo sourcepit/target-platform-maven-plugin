@@ -239,7 +239,12 @@ public class TychoSessionTargetPlatformResolver extends AbstractTychoTargetPlatf
          {
             final TargetPlatformConfiguration configuration = getTargetPlatformConfiguration(session, project);
             environments.addAll(configuration.getEnvironments());
-            executionEnvironments.add(configuration.getExecutionEnvironment());
+
+            final String executionEnvironment = configuration.getExecutionEnvironment();
+            if (executionEnvironment != null)
+            {
+               executionEnvironments.add(executionEnvironment);
+            }
 
             final Boolean allow = aggregatedPlatform.getAllowConflictingDependencies();
             if (allow == null || allow.booleanValue() == false)
@@ -293,7 +298,10 @@ public class TychoSessionTargetPlatformResolver extends AbstractTychoTargetPlatf
       }
 
       aggregatedPlatform.getEnvironments().addAll(environments);
-      aggregatedPlatform.setExecutionEnvironment(eeSelector.select(executionEnvironments));
+      if (!executionEnvironments.isEmpty())
+      {
+         aggregatedPlatform.setExecutionEnvironment(eeSelector.select(executionEnvironments));
+      }
 
       for (ArtifactKey requirement : requirements)
       {
