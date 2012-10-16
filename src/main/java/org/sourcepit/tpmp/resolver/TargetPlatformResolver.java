@@ -13,6 +13,9 @@ import org.apache.maven.execution.MavenSession;
 
 public interface TargetPlatformResolver
 {
+   boolean isRelyingOnCachedFiles();
+   
    void resolve(MavenSession session, File platformDir, boolean includeSource, boolean forceUpdate,
       TargetPlatformConfigurationHandler configHandler, TargetPlatformResolutionHandler resolutionHandler);
+
 }

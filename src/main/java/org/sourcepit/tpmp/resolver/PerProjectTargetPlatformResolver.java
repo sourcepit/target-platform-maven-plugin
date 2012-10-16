@@ -28,6 +28,11 @@ public class PerProjectTargetPlatformResolver implements TargetPlatformResolver
    @Inject
    private ProjectTargetPlatformResolver tpResolver;
 
+   public boolean isRelyingOnCachedFiles()
+   {
+      return true;
+   }
+
    public Logger getLogger()
    {
       return logger;

@@ -50,6 +50,11 @@ public class TychoSessionTargetPlatformResolver extends AbstractTychoTargetPlatf
 {
    @Inject
    private ExecutionEnvironmentSelector eeSelector;
+   
+   public boolean isRelyingOnCachedFiles()
+   {
+      return false;
+   }
 
    /**
     * {@inheritDoc}
