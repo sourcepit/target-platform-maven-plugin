@@ -7,7 +7,7 @@
 package org.sourcepit.tpmp.resolver;
 public interface TargetPlatformConfigurationHandler
 {
-   void handleTargetEnvironment(String os, String ws, String arch, String nl);
+   void handleTargetEnvironment(String os, String ws, String arch);
    
    void handleExecutionEnvironment(String ee);
 }

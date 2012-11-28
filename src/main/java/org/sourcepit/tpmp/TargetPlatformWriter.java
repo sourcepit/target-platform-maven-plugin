@@ -65,13 +65,6 @@ public class TargetPlatformWriter
       Element archElem = doc.createElement("arch");
       archElem.setTextContent(targetEnvironment.getArch());
       environmentElem.appendChild(archElem);
-
-      if (targetEnvironment.getNl() != null)
-      {
-         Element nlElem = doc.createElement("nl");
-         nlElem.setTextContent(targetEnvironment.getNl());
-         environmentElem.appendChild(nlElem);
-      }
    }
 
    private void appendExecutionEnvironment(Element parentElem, String executionEnvironment)

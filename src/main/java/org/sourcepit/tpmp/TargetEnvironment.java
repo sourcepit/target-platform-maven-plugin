@@ -16,15 +16,12 @@ public class TargetEnvironment
 
    private final String arch;
 
-   private final String nl;
-
-   public TargetEnvironment(@NotNull String os, @NotNull String ws, @NotNull String arch, String nl)
+   public TargetEnvironment(@NotNull String os, @NotNull String ws, @NotNull String arch)
    {
       super();
       this.os = os;
       this.ws = ws;
       this.arch = arch;
-      this.nl = nl;
    }
 
    public String getOs()
@@ -42,18 +39,12 @@ public class TargetEnvironment
       return arch;
    }
 
-   public String getNl()
-   {
-      return nl;
-   }
-
    @Override
    public int hashCode()
    {
       final int prime = 31;
       int result = 1;
       result = prime * result + ((arch == null) ? 0 : arch.hashCode());
-      result = prime * result + ((nl == null) ? 0 : nl.hashCode());
       result = prime * result + ((os == null) ? 0 : os.hashCode());
       result = prime * result + ((ws == null) ? 0 : ws.hashCode());
       return result;
@@ -75,13 +66,6 @@ public class TargetEnvironment
             return false;
       }
       else if (!arch.equals(other.arch))
-         return false;
-      if (nl == null)
-      {
-         if (other.nl != null)
-            return false;
-      }
-      else if (!nl.equals(other.nl))
          return false;
       if (os == null)
       {

@@ -62,9 +62,9 @@ public class CopyTargetPlatformResolutionHandler implements TargetPlatformResolu
       return executionEnvironments;
    }
 
-   public void handleTargetEnvironment(@NotNull String os, @NotNull String ws, @NotNull String arch, String nl)
+   public void handleTargetEnvironment(@NotNull String os, @NotNull String ws, @NotNull String arch)
    {
-      targetEnvironments.add(new TargetEnvironment(os, ws, arch, nl));
+      targetEnvironments.add(new TargetEnvironment(os, ws, arch));
    }
 
    public void handleExecutionEnvironment(@NotNull String ee)

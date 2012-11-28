@@ -96,7 +96,8 @@ public class AbstractTychoTargetPlatformResolver
    {
       final TargetPlatformResolver platformResolver = targetPlatformResolverLocator.lookupPlatformResolver(project);
 
-      final TargetPlatform targetPlatform = platformResolver.computeTargetPlatform(session, project, reactorProjects);
+      final TargetPlatform targetPlatform = platformResolver.computeTargetPlatform(session, project, reactorProjects,
+         false);
 
       final DependencyResolverConfiguration resolverConfiguration = new DependencyResolverConfiguration()
       {

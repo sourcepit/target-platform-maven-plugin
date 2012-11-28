@@ -100,11 +100,6 @@ public abstract class AbstractTargetPlatformMojo extends AbstractGuplexedMojo
       sb.append(targetEnvironment.getWs());
       sb.append('-');
       sb.append(targetEnvironment.getArch());
-      if (targetEnvironment.getNl() != null)
-      {
-         sb.append('-');
-         sb.append(targetEnvironment.getNl());
-      }
       return sb.toString();
    }
 

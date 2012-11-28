@@ -28,10 +28,10 @@ import org.apache.maven.model.Plugin;
 import org.apache.maven.project.MavenProject;
 import org.eclipse.tycho.ArtifactKey;
 import org.eclipse.tycho.ReactorProject;
-import org.eclipse.tycho.core.TargetEnvironment;
 import org.eclipse.tycho.core.TargetPlatformConfiguration;
 import org.eclipse.tycho.core.TychoConstants;
 import org.eclipse.tycho.core.TychoProject;
+import org.eclipse.tycho.core.facade.TargetEnvironment;
 import org.eclipse.tycho.core.osgitools.AbstractTychoProject;
 import org.eclipse.tycho.core.osgitools.DefaultReactorProject;
 import org.eclipse.tycho.core.utils.TychoProjectUtils;
@@ -87,7 +87,7 @@ public class TychoSessionTargetPlatformResolver extends AbstractTychoTargetPlatf
    {
       for (TargetEnvironment te : aggregatedConfiguration.getEnvironments())
       {
-         configHandler.handleTargetEnvironment(te.getOs(), te.getWs(), te.getArch(), te.getNl());
+         configHandler.handleTargetEnvironment(te.getOs(), te.getWs(), te.getArch());
       }
 
       final String ee = aggregatedConfiguration.getExecutionEnvironment();
@@ -256,17 +256,11 @@ public class TychoSessionTargetPlatformResolver extends AbstractTychoTargetPlatf
             {
                aggregatedPlatform.setAllowConflictingDependencies(configuration.getAllowConflictingDependencies());
             }
-
-            final boolean disableP2Mirrors = aggregatedPlatform.isDisableP2Mirrors();
-            if (!disableP2Mirrors)
-            {
-               aggregatedPlatform.setDisableP2Mirrors(configuration.isDisableP2Mirrors());
-            }
-
+            
             final boolean implicitTargetEnvironment = aggregatedPlatform.isImplicitTargetEnvironment();
             if (!implicitTargetEnvironment)
             {
-               aggregatedPlatform.setImplicitTargetEnvironment(configuration.isDisableP2Mirrors());
+               aggregatedPlatform.setImplicitTargetEnvironment(configuration.isImplicitTargetEnvironment());
             }
 
             final boolean includePackedArtifacts = aggregatedPlatform.isIncludePackedArtifacts();

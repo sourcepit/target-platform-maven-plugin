@@ -16,8 +16,8 @@ import javax.inject.Named;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.project.MavenProject;
-import org.eclipse.tycho.core.TargetEnvironment;
 import org.eclipse.tycho.core.TargetPlatformConfiguration;
+import org.eclipse.tycho.core.facade.TargetEnvironment;
 import org.eclipse.tycho.core.osgitools.DefaultReactorProject;
 import org.sourcepit.tpmp.resolver.ProjectTargetPlatformResolver;
 import org.sourcepit.tpmp.resolver.TargetPlatformConfigurationHandler;
@@ -40,7 +40,7 @@ public class TychoProjectTargetPlatformResolver extends AbstractTychoTargetPlatf
 
       for (TargetEnvironment te : configuration.getEnvironments())
       {
-         handler.handleTargetEnvironment(te.getOs(), te.getWs(), te.getArch(), te.getNl());
+         handler.handleTargetEnvironment(te.getOs(), te.getWs(), te.getArch());
       }
 
       final String ee = configuration.getExecutionEnvironment();
