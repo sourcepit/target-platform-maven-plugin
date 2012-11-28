@@ -31,6 +31,8 @@ import org.eclipse.tycho.ReactorProject;
 import org.eclipse.tycho.core.TargetPlatformConfiguration;
 import org.eclipse.tycho.core.TychoConstants;
 import org.eclipse.tycho.core.TychoProject;
+import org.eclipse.tycho.core.ee.ExecutionEnvironmentConfigurationImpl;
+import org.eclipse.tycho.core.ee.shared.ExecutionEnvironmentConfiguration;
 import org.eclipse.tycho.core.facade.TargetEnvironment;
 import org.eclipse.tycho.core.osgitools.AbstractTychoProject;
 import org.eclipse.tycho.core.osgitools.DefaultReactorProject;
@@ -147,6 +149,10 @@ public class TychoSessionTargetPlatformResolver extends AbstractTychoTargetPlatf
       fake.setContextValue(TychoConstants.CTX_MERGED_PROPERTIES, properties);
 
       fake.setContextValue(TychoConstants.CTX_TARGET_PLATFORM_CONFIGURATION, aggregatedConfiguration);
+      
+      ExecutionEnvironmentConfiguration eeConfiguration = new ExecutionEnvironmentConfigurationImpl();
+      tychoProject.readExecutionEnvironmentConfiguration(fake, eeConfiguration);
+      fake.setContextValue(TychoConstants.CTX_EXECUTION_ENVIRONMENT_CONFIGURATION, eeConfiguration);
 
       Map<String, DependencyMetadata> metadata = new LinkedHashMap<String, DependencyMetadata>();
 
