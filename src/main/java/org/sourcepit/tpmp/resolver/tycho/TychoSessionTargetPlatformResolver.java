@@ -20,6 +20,7 @@ import java.util.Set;
 import javax.inject.Inject;
 import javax.inject.Named;
 
+import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.model.Build;
 import org.apache.maven.model.Dependency;
@@ -52,7 +53,7 @@ public class TychoSessionTargetPlatformResolver extends AbstractTychoTargetPlatf
 {
    @Inject
    private ExecutionEnvironmentSelector eeSelector;
-   
+
    public boolean isRelyingOnCachedFiles()
    {
       return false;
@@ -128,8 +129,29 @@ public class TychoSessionTargetPlatformResolver extends AbstractTychoTargetPlatf
       MavenProject fake = new MavenProject(model);
       fake.setClassRealm(origin.getClassRealm());
       fake.setFile(origin.getFile());
-      fake.setRemoteArtifactRepositories(origin.getRemoteArtifactRepositories());
-      fake.setPluginArtifactRepositories(origin.getPluginArtifactRepositories());
+
+      final Map<String, ArtifactRepository> artifactRepositories = new LinkedHashMap<String, ArtifactRepository>();
+      final Map<String, ArtifactRepository> pluginRepositories = new LinkedHashMap<String, ArtifactRepository>();
+      for (MavenProject project : session.getProjects())
+      {
+         for (ArtifactRepository repository : project.getRemoteArtifactRepositories())
+         {
+            if (!artifactRepositories.containsKey(repository.getId()))
+            {
+               artifactRepositories.put(repository.getId(), repository);
+            }
+         }
+         for (ArtifactRepository repository : project.getPluginArtifactRepositories())
+         {
+            if (!pluginRepositories.containsKey(repository.getId()))
+            {
+               pluginRepositories.put(repository.getId(), repository);
+            }
+         }
+      }
+
+      fake.setRemoteArtifactRepositories(new ArrayList<ArtifactRepository>(artifactRepositories.values()));
+      fake.setPluginArtifactRepositories(new ArrayList<ArtifactRepository>(pluginRepositories.values()));
       fake.setManagedVersionMap(origin.getManagedVersionMap());
 
       if (getTychoProject(fake) == null)
@@ -149,7 +171,7 @@ public class TychoSessionTargetPlatformResolver extends AbstractTychoTargetPlatf
       fake.setContextValue(TychoConstants.CTX_MERGED_PROPERTIES, properties);
 
       fake.setContextValue(TychoConstants.CTX_TARGET_PLATFORM_CONFIGURATION, aggregatedConfiguration);
-      
+
       ExecutionEnvironmentConfiguration eeConfiguration = new ExecutionEnvironmentConfigurationImpl();
       tychoProject.readExecutionEnvironmentConfiguration(fake, eeConfiguration);
       fake.setContextValue(TychoConstants.CTX_EXECUTION_ENVIRONMENT_CONFIGURATION, eeConfiguration);
@@ -262,7 +284,7 @@ public class TychoSessionTargetPlatformResolver extends AbstractTychoTargetPlatf
             {
                aggregatedPlatform.setAllowConflictingDependencies(configuration.getAllowConflictingDependencies());
             }
-            
+
             final boolean implicitTargetEnvironment = aggregatedPlatform.isImplicitTargetEnvironment();
             if (!implicitTargetEnvironment)
             {
