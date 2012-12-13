@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.sourcepit</groupId>
 		<artifactId>srcpit-parent</artifactId>
-		<version>8-SNAPSHOT</version>
+		<version>8</version>
 	</parent>
 
 	<artifactId>target-platform-maven-plugin</artifactId>
@@ -37,27 +37,27 @@
 			<dependency>
 				<groupId>org.sourcepit.common</groupId>
 				<artifactId>common-utils</artifactId>
-				<version>0.1.0-SNAPSHOT</version>
+				<version>0.1.0-alpha-4</version>
 			</dependency>
 			<dependency>
 				<groupId>org.sourcepit.common</groupId>
 				<artifactId>common-constraints</artifactId>
-				<version>0.1.0-SNAPSHOT</version>
+				<version>0.1.0-alpha-2</version>
 			</dependency>
 			<dependency>
 				<groupId>org.sourcepit.common</groupId>
 				<artifactId>common-maven</artifactId>
-				<version>0.1.0-SNAPSHOT</version>
+				<version>0.1.0-alpha-7</version>
 			</dependency>
 			<dependency>
 				<groupId>org.sourcepit.common</groupId>
 				<artifactId>common-testing</artifactId>
-				<version>0.1.0-alpha-5</version>
+				<version>0.1.0-alpha-6</version>
 			</dependency>
 			<dependency>
 				<groupId>org.sourcepit</groupId>
 				<artifactId>guice-plexus-bridge</artifactId>
-				<version>0.1.0-alpha-4</version>
+				<version>0.1.0-alpha-5</version>
 			</dependency>
 			<dependency>
 				<groupId>org.sourcepit</groupId>
@@ -67,7 +67,7 @@
 			<dependency>
 				<groupId>org.sourcepit.tools</groupId>
 				<artifactId>osgify-core</artifactId>
-				<version>0.1.0-SNAPSHOT</version>
+				<version>0.1.0-alpha-2</version>
 			</dependency>
 			<dependency>
 				<groupId>org.eclipse.tycho</groupId>
@@ -191,7 +191,7 @@
 				<plugin>
 					<groupId>org.sourcepit.tools</groupId>
 					<artifactId>maven-install-plugin</artifactId>
-					<version>0.1.0-alpha-2</version>
+					<version>0.1.0-alpha-3</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
