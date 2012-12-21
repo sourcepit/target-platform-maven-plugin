@@ -95,13 +95,12 @@ public class TychoSourceIUResolver
                final String targetKey = targetIdAndVersion[0] + "_" + targetIdAndVersion[1];
                if (sourceTargets.remove(targetKey))
                {
-                  final P2ResolutionResult result = resolver.resolveInstallableUnit(targetPlatform, symbolicName,
-                     version);
-
+                  final P2ResolutionResult result = resolve(targetPlatform, resolver, symbolicName, version);
                   for (Entry entry : result.getArtifacts())
                   {
                      final Optional<MavenProject> mavenProject = projectFacade.getMavenProject(projectsMap,
                         targetIdAndVersion[0], targetIdAndVersion[1]);
+
                      final File location = projectFacade.getLocation(entry, mavenProject);
                      if (location != null && location.exists())
                      {
@@ -112,6 +111,13 @@ public class TychoSourceIUResolver
             }
          }
       }
+   }
+
+   private static P2ResolutionResult resolve(final TargetPlatform targetPlatform, final P2Resolver resolver,
+      final String symbolicName, String version)
+   {
+      final String strictVersion = "[" + version + "," + version + "]";
+      return resolver.resolveInstallableUnit(targetPlatform, symbolicName, strictVersion);
    }
 
    private P2Resolver createResolver()
