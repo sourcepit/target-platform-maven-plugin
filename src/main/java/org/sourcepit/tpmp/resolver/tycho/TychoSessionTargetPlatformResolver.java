@@ -27,6 +27,7 @@ import org.apache.maven.model.Dependency;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.Plugin;
 import org.apache.maven.project.MavenProject;
+import org.codehaus.plexus.logging.Logger;
 import org.eclipse.tycho.ArtifactKey;
 import org.eclipse.tycho.ReactorProject;
 import org.eclipse.tycho.core.TargetPlatformConfiguration;
@@ -53,6 +54,9 @@ public class TychoSessionTargetPlatformResolver extends AbstractTychoTargetPlatf
 {
    @Inject
    private ExecutionEnvironmentSelector eeSelector;
+   
+   @Inject
+   private Logger logger;
 
    public boolean isRelyingOnCachedFiles()
    {
@@ -172,7 +176,7 @@ public class TychoSessionTargetPlatformResolver extends AbstractTychoTargetPlatf
 
       fake.setContextValue(TychoConstants.CTX_TARGET_PLATFORM_CONFIGURATION, aggregatedConfiguration);
 
-      ExecutionEnvironmentConfiguration eeConfiguration = new ExecutionEnvironmentConfigurationImpl();
+      ExecutionEnvironmentConfiguration eeConfiguration = new ExecutionEnvironmentConfigurationImpl(logger);
       tychoProject.readExecutionEnvironmentConfiguration(fake, eeConfiguration);
       fake.setContextValue(TychoConstants.CTX_EXECUTION_ENVIRONMENT_CONFIGURATION, eeConfiguration);
 
