@@ -6,9 +6,9 @@
 
 package org.sourcepit.tpmp.change;
 
-import static org.sourcepit.common.utils.io.IOResources.buffIn;
-import static org.sourcepit.common.utils.io.IOResources.byteIn;
-import static org.sourcepit.common.utils.io.IOResources.fileIn;
+import static org.sourcepit.common.utils.io.IO.buffIn;
+import static org.sourcepit.common.utils.io.IO.byteIn;
+import static org.sourcepit.common.utils.io.IO.fileIn;
 
 import java.io.File;
 import java.io.FilterReader;
@@ -34,7 +34,7 @@ import org.apache.maven.project.MavenProject;
 import org.sourcepit.common.utils.charset.CharsetDetectionResult;
 import org.sourcepit.common.utils.charset.CharsetDetector;
 import org.sourcepit.common.utils.io.IOOperation;
-import org.sourcepit.common.utils.io.IOResource;
+import org.sourcepit.common.utils.io.IOHandle;
 import org.sourcepit.common.utils.lang.Exceptions;
 import org.sourcepit.common.utils.path.PathUtils;
 import org.sourcepit.common.utils.props.LinkedPropertiesMap;
@@ -215,7 +215,7 @@ public class ChecksumTargetPlatformConfigurationChangeDiscoverer implements Targ
    }
 
    private static String calculateHash(final MessageDigest algorithm,
-      final IOResource<? extends InputStream> ioResource, final String encoding)
+      final IOHandle<? extends InputStream> ioResource, final String encoding)
    {
       Reader reader = null;
       InputStream inputStream = null;

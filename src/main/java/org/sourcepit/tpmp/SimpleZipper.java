@@ -6,10 +6,10 @@
 
 package org.sourcepit.tpmp;
 
-import static org.sourcepit.common.utils.io.IOResources.buffIn;
-import static org.sourcepit.common.utils.io.IOResources.fileIn;
-import static org.sourcepit.common.utils.io.IOResources.fileOut;
-import static org.sourcepit.common.utils.io.IOResources.zipOut;
+import static org.sourcepit.common.utils.io.IO.buffIn;
+import static org.sourcepit.common.utils.io.IO.fileIn;
+import static org.sourcepit.common.utils.io.IO.fileOut;
+import static org.sourcepit.common.utils.io.IO.zipOut;
 
 import java.io.File;
 import java.io.IOException;
