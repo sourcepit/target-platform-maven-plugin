@@ -71,7 +71,7 @@
 			<dependency>
 				<groupId>org.sourcepit.tools</groupId>
 				<artifactId>osgify-core</artifactId>
-				<version>0.1.0-alpha-5-rc7</version>
+				<version>0.1.0-alpha-5</version>
 			</dependency>
 			<dependency>
 				<groupId>org.eclipse.tycho</groupId>
