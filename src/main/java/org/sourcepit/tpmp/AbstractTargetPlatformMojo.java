@@ -6,7 +6,13 @@
 
 package org.sourcepit.tpmp;
 
+import static org.sourcepit.common.utils.io.IO.cpIn;
+import static org.sourcepit.common.utils.io.IO.read;
+import static org.sourcepit.common.utils.xml.XmlUtils.queryNode;
+import static org.sourcepit.common.utils.xml.XmlUtils.writeXml;
+
 import java.io.File;
+import java.io.InputStream;
 import java.util.Collection;
 import java.util.Map;
 
@@ -16,15 +22,18 @@ import org.apache.maven.artifact.Artifact;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.repository.RepositorySystem;
+import org.sourcepit.common.utils.io.Read.FromStream;
+import org.sourcepit.common.utils.xml.XmlUtils;
 import org.sourcepit.tpmp.ee.ExecutionEnvironmentSelector;
 import org.sourcepit.tpmp.resolver.TargetPlatformResolver;
+import org.w3c.dom.Document;
 
 public abstract class AbstractTargetPlatformMojo extends AbstractGuplexedMojo
 {
    /** @parameter expression="${session}" */
    protected MavenSession session;
 
-   /** @parameter default-value="${project.build.directory}" */
+   /** @parameter expression="${tpmp.targetDir}" default-value="${project.build.directory}" */
    protected File targetDir;
 
    /** @parameter expression="${tpmp.forceUpdate}" default-value="false" */
@@ -35,6 +44,9 @@ public abstract class AbstractTargetPlatformMojo extends AbstractGuplexedMojo
 
    /** @parameter expression="${tpmp.classifier}" default-value="target" */
    protected String classifier;
+
+   /** @parameter expression="${tpmp.eclipseProjectName}" default-value="Target Platforms" */
+   protected String eclipseProjectName;
 
    /** @parameter expression="${tpmp.resolutionStrategy}" default-value="per-session" */
    protected String resolutionStrategy;
@@ -64,6 +76,35 @@ public abstract class AbstractTargetPlatformMojo extends AbstractGuplexedMojo
 
       final String executionEnvironment = selectExecutionEnvironment(resolutionHandler.getExecutionEnvironments());
       writeDefinitions(project, platformDir, executionEnvironment, resolutionHandler.getTargetEnvironments());
+      
+      writeDotProject(platformDir);
+   }
+
+   private void writeDotProject(final File platformDir)
+   {
+      final File dotProject = new File(platformDir.getParentFile(), ".project");
+      if (dotProject.exists())
+      {
+         getLog().info("Eclipse project description (.project) already exists, skipping creation of a new one.");
+      }
+      else
+      {
+         getLog().info(
+            "Writing Eclipse project description (.project) under " + dotProject.getParent()
+               + ". You can import the project into your workspace afterwards.");
+
+         final Document doc = read(new FromStream<Document>()
+         {
+            @Override
+            public Document read(InputStream inputStream) throws Exception
+            {
+               return XmlUtils.readXml(inputStream);
+            }
+         }, cpIn(getClass().getClassLoader(), "META-INF/tpmp/.project"));
+
+         queryNode(doc, "/projectDescription/name").setTextContent(eclipseProjectName);
+         writeXml(doc, dotProject);
+      }
    }
 
    protected TargetPlatformResolver getResolver()
@@ -112,8 +153,6 @@ public abstract class AbstractTargetPlatformMojo extends AbstractGuplexedMojo
    {
       return new File(targetDir, getClassifiedName(project) + ".zip");
    }
-
-
 
    protected File getPlatformDir(MavenProject project)
    {
