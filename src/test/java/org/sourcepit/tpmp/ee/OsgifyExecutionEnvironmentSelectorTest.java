@@ -18,20 +18,13 @@ import java.util.List;
 import javax.inject.Inject;
 import javax.validation.ConstraintViolationException;
 
+import org.eclipse.sisu.launch.InjectedTest;
 import org.junit.Test;
-import org.sourcepit.guplex.test.GuplexTest;
-import org.sourcepit.tpmp.ee.DefaultExecutionEnvironmentSelector;
 
-public class OsgifyExecutionEnvironmentSelectorTest extends GuplexTest
+public class OsgifyExecutionEnvironmentSelectorTest extends InjectedTest
 {
    @Inject
    private DefaultExecutionEnvironmentSelector selector;
-
-   @Override
-   protected boolean isUseIndex()
-   {
-      return true;
-   }
 
    @Test
    public void testNull()

@@ -1,14 +1,15 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
 		<groupId>org.sourcepit</groupId>
 		<artifactId>srcpit-parent</artifactId>
-		<version>10</version>
+		<version>11-SNAPSHOT</version>
 	</parent>
 
 	<artifactId>target-platform-maven-plugin</artifactId>
-	<version>0.1.0-SNAPSHOT</version>
+	<version>0.11.0-SNAPSHOT</version>
 	<packaging>maven-plugin</packaging>
 
 	<scm>
@@ -41,37 +42,32 @@
 			<dependency>
 				<groupId>org.sourcepit.common</groupId>
 				<artifactId>common-utils</artifactId>
-				<version>0.1.0-alpha-9</version>
+				<version>0.10.0-SNAPSHOT</version>
 			</dependency>
 			<dependency>
 				<groupId>org.sourcepit.common</groupId>
 				<artifactId>common-constraints</artifactId>
-				<version>0.1.0-alpha-4</version>
+				<version>0.5.0-SNAPSHOT</version>
 			</dependency>
 			<dependency>
 				<groupId>org.sourcepit.common</groupId>
 				<artifactId>common-maven</artifactId>
-				<version>0.1.0-alpha-13</version>
+				<version>0.15.0-SNAPSHOT</version>
+			</dependency>
+			<dependency>
+				<groupId>org.sourcepit.common</groupId>
+				<artifactId>common-manifest</artifactId>
+				<version>0.12.0-SNAPSHOT</version>
 			</dependency>
 			<dependency>
 				<groupId>org.sourcepit.common</groupId>
 				<artifactId>common-testing</artifactId>
-				<version>0.1.0-alpha-8</version>
-			</dependency>
-			<dependency>
-				<groupId>org.sourcepit</groupId>
-				<artifactId>guice-plexus-bridge</artifactId>
-				<version>0.1.0-alpha-7</version>
-			</dependency>
-			<dependency>
-				<groupId>org.sourcepit</groupId>
-				<artifactId>slf4j-plexus</artifactId>
-				<version>0.1.0-alpha-4</version>
+				<version>0.9.0-SNAPSHOT</version>
 			</dependency>
 			<dependency>
 				<groupId>org.sourcepit.tools</groupId>
 				<artifactId>osgify-core</artifactId>
-				<version>0.1.0-alpha-8</version>
+				<version>0.10.0-SNAPSHOT</version>
 			</dependency>
 			<dependency>
 				<groupId>org.eclipse.tycho</groupId>
@@ -98,12 +94,17 @@
 
 	<dependencies>
 		<dependency>
-			<groupId>org.sourcepit</groupId>
-			<artifactId>guice-plexus-bridge</artifactId>
+			<groupId>org.apache.maven</groupId>
+			<artifactId>maven-plugin-api</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.sourcepit</groupId>
-			<artifactId>slf4j-plexus</artifactId>
+			<groupId>org.apache.maven.plugin-tools</groupId>
+			<artifactId>maven-plugin-annotations</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.sourcepit.common</groupId>
+			<artifactId>common-manifest</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.sourcepit.common</groupId>
@@ -157,6 +158,28 @@
 			<artifactId>maven-embedder</artifactId>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+			<groupId>org.eclipse.sisu</groupId>
+			<artifactId>org.eclipse.sisu.inject</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.sonatype.sisu</groupId>
+			<artifactId>sisu-guice</artifactId>
+			<classifier>no_aop</classifier>
+			<scope>test</scope>
+			<exclusions>
+				<exclusion>
+					<artifactId>aopalliance</artifactId>
+					<groupId>aopalliance</groupId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-simple</artifactId>
+			<scope>provided</scope>
+		</dependency>
 	</dependencies>
 
 	<build>
@@ -202,8 +225,13 @@
 				</plugin>
 				<plugin>
 					<groupId>org.sourcepit.tools</groupId>
-					<artifactId>maven-install-plugin</artifactId>
-					<version>0.1.0-alpha-5</version>
+					<artifactId>install-maven-plugin</artifactId>
+					<version>0.6.0-SNAPSHOT</version>
+				</plugin>
+				<plugin>
+					<groupId>org.sourcepit.tools</groupId>
+					<artifactId>deploy-maven-plugin</artifactId>
+					<version>0.1.0-SNAPSHOT</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -261,7 +289,7 @@
 			</plugin>
 			<plugin>
 				<groupId>org.sourcepit.tools</groupId>
-				<artifactId>maven-install-plugin</artifactId>
+				<artifactId>install-maven-plugin</artifactId>
 				<executions>
 					<execution>
 						<id>install-base</id>
@@ -279,6 +307,39 @@
 						<id>generate</id>
 						<goals>
 							<goal>generate-metadata</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-plugin-plugin</artifactId>
+				<configuration>
+					<skipErrorNoDescriptorsFound>true</skipErrorNoDescriptorsFound>
+				</configuration>
+				<executions>
+					<execution>
+						<id>mojo-descriptor</id>
+						<goals>
+							<goal>descriptor</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>help-goal</id>
+						<goals>
+							<goal>helpmojo</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.sonatype.plugins</groupId>
+				<artifactId>sisu-maven-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>generate-index</id>
+						<goals>
+							<goal>main-index</goal>
 						</goals>
 					</execution>
 				</executions>
@@ -318,7 +379,7 @@
 				<plugins>
 					<plugin>
 						<groupId>org.sourcepit.tools</groupId>
-						<artifactId>maven-install-plugin</artifactId>
+						<artifactId>install-maven-plugin</artifactId>
 						<executions>
 							<execution>
 								<id>force-install</id>
@@ -369,8 +430,8 @@
 						</executions>
 					</plugin>
 					<plugin>
-						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-deploy-plugin</artifactId>
+						<groupId>org.sourcepit.tools</groupId>
+						<artifactId>deploy-maven-plugin</artifactId>
 						<executions>
 							<execution>
 								<id>gather-artifacts</id>

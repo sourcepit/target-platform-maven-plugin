@@ -12,6 +12,7 @@ import java.io.IOException;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.resolver.ArtifactResolutionRequest;
 import org.apache.maven.execution.MavenSession;
+import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.project.MavenProject;
 import org.sourcepit.common.utils.lang.Exceptions;
 import org.sourcepit.common.utils.zip.ZipProcessingRequest;
@@ -19,17 +20,15 @@ import org.sourcepit.common.utils.zip.ZipProcessor;
 
 
 /**
- * @goal localize
- * @requiresProject true
- * @aggregator
  * @author Bernd Vogt <bernd.vogt@sourcepit.org>
  */
+@Mojo(name = "localize", requiresProject = true, aggregator = true)
 public class LocalizeTargetPlatformMojo extends AbstractTargetPlatformMojo
 {
    @Override
    protected void doExecute()
    {
-      final MavenProject project = session.getCurrentProject();
+      final MavenProject project = getSession().getCurrentProject();
 
       final File platformDir = downloadTargetPlatformOnDemand(project);
 
@@ -41,7 +40,7 @@ public class LocalizeTargetPlatformMojo extends AbstractTargetPlatformMojo
       final File platformDir = getPlatformDir(project);
       if (!platformDir.exists() && getResolver().isRelyingOnCachedFiles())
       {
-         download(session, project, platformDir.getParentFile());
+         download(getSession(), project, platformDir.getParentFile());
       }
       return platformDir;
    }

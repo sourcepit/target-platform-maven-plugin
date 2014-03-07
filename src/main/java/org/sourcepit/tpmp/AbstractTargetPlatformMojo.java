@@ -20,35 +20,41 @@ import javax.inject.Inject;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.execution.MavenSession;
+import org.apache.maven.plugin.AbstractMojo;
+import org.apache.maven.plugin.LegacySupport;
+import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.repository.RepositorySystem;
 import org.sourcepit.common.utils.io.Read.FromStream;
+import org.sourcepit.common.utils.lang.PipedException;
 import org.sourcepit.common.utils.xml.XmlUtils;
 import org.sourcepit.tpmp.ee.ExecutionEnvironmentSelector;
 import org.sourcepit.tpmp.resolver.TargetPlatformResolver;
 import org.w3c.dom.Document;
 
-public abstract class AbstractTargetPlatformMojo extends AbstractGuplexedMojo
+public abstract class AbstractTargetPlatformMojo extends AbstractMojo
 {
-   /** @parameter expression="${session}" */
-   protected MavenSession session;
+   @Inject
+   protected LegacySupport buildContext;
 
-   /** @parameter expression="${tpmp.targetDir}" default-value="${project.build.directory}" */
+   @Parameter(property = "tpmp.targetDir", defaultValue = "${project.build.directory}")
    protected File targetDir;
 
-   /** @parameter expression="${tpmp.forceUpdate}" default-value="false" */
+   @Parameter(property = "tpmp.forceUpdate", defaultValue = "false")
    private boolean forceUpdate;
 
-   /** @parameter expression="${tpmp.includeSource}" default-value="true" */
+   @Parameter(property = "tpmp.includeSource", defaultValue = "true")
    private boolean includeSource;
 
-   /** @parameter expression="${tpmp.classifier}" default-value="target" */
+   @Parameter(property = "tpmp.classifier", defaultValue = "target")
    protected String classifier;
 
-   /** @parameter expression="${tpmp.eclipseProjectName}" default-value="Target Platforms" */
+   @Parameter(property = "tpmp.eclipseProjectName", defaultValue = "Target Platforms")
    protected String eclipseProjectName;
 
-   /** @parameter expression="${tpmp.resolutionStrategy}" default-value="per-session" */
+   @Parameter(property = "tpmp.resolutionStrategy", defaultValue = "per-session")
    protected String resolutionStrategy;
 
    @Inject
@@ -59,6 +65,22 @@ public abstract class AbstractTargetPlatformMojo extends AbstractGuplexedMojo
 
    @Inject
    private Map<String, TargetPlatformResolver> resolverMap;
+
+   public final void execute() throws MojoExecutionException, MojoFailureException
+   {
+      try
+      {
+         doExecute();
+      }
+      catch (PipedException e)
+      {
+         e.adaptAndThrow(MojoExecutionException.class);
+         e.adaptAndThrow(MojoFailureException.class);
+         throw e;
+      }
+   }
+
+   protected abstract void doExecute();
 
    protected Artifact createPlatformArtifact(MavenProject project)
    {
@@ -72,12 +94,17 @@ public abstract class AbstractTargetPlatformMojo extends AbstractGuplexedMojo
       final TargetPlatformResolver resolver = getResolver();
 
       final CopyTargetPlatformResolutionHandler resolutionHandler = new CopyTargetPlatformResolutionHandler(platformDir);
-      resolver.resolve(session, platformDir, includeSource, forceUpdate, resolutionHandler, resolutionHandler);
+      resolver.resolve(getSession(), platformDir, includeSource, forceUpdate, resolutionHandler, resolutionHandler);
 
       final String executionEnvironment = selectExecutionEnvironment(resolutionHandler.getExecutionEnvironments());
       writeDefinitions(project, platformDir, executionEnvironment, resolutionHandler.getTargetEnvironments());
-      
+
       writeDotProject(platformDir);
+   }
+
+   protected MavenSession getSession()
+   {
+      return buildContext.getSession();
    }
 
    private void writeDotProject(final File platformDir)

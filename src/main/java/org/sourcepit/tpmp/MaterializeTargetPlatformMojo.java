@@ -16,25 +16,25 @@ import org.apache.maven.artifact.deployer.ArtifactDeploymentException;
 import org.apache.maven.artifact.installer.ArtifactInstallationException;
 import org.apache.maven.artifact.installer.ArtifactInstaller;
 import org.apache.maven.execution.MavenSession;
+import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.project.MavenProjectHelper;
 import org.sourcepit.common.utils.lang.Exceptions;
 
 /**
- * @goal materialize
- * @requiresProject true
- * @aggregator
  * @author Bernd Vogt <bernd.vogt@sourcepit.org>
  */
+@Mojo(name = "materialize", requiresProject = true, aggregator = true)
 public class MaterializeTargetPlatformMojo extends AbstractTargetPlatformMojo
 {
-   /** @parameter expression="${tpmp.attach}" default-value="true" */
+   @Parameter(property = "tpmp.attach", defaultValue = "true")
    private boolean attach;
 
-   /** @parameter expression="${tpmp.install}" default-value="false" */
+   @Parameter(property = "tpmp.install", defaultValue = "false")
    private boolean install;
 
-   /** @parameter expression="${tpmp.deploy}" default-value="false" */
+   @Parameter(property = "tpmp.deploy", defaultValue = "false")
    private boolean deploy;
    @Inject
    private ArtifactDeployer deployer;
@@ -48,8 +48,8 @@ public class MaterializeTargetPlatformMojo extends AbstractTargetPlatformMojo
    @Override
    protected void doExecute()
    {
-      final MavenProject project = session.getCurrentProject();
-      
+      final MavenProject project = getSession().getCurrentProject();
+
       final File platformDir = getPlatformDir(project);
       updateTargetPlatform(project, platformDir);
 
@@ -57,12 +57,12 @@ public class MaterializeTargetPlatformMojo extends AbstractTargetPlatformMojo
 
       final Artifact platformArtifact = createPlatformArtifact(project);
       platformArtifact.setFile(platformZipFile);
-      
+
       attach(project, platformArtifact);
-      
-      install(session, platformArtifact);
-      
-      deploy(session, project, platformArtifact);
+
+      install(getSession(), platformArtifact);
+
+      deploy(getSession(), project, platformArtifact);
    }
 
    private File zip(final MavenProject project, final File platformDir)
