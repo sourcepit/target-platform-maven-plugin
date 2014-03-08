@@ -9,15 +9,16 @@ package org.sourcepit.tpmp.resolver.tycho;
 import java.util.List;
 import java.util.Map;
 
+import javax.inject.Named;
+
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.project.MavenProject;
-import org.codehaus.plexus.component.annotations.Component;
 import org.eclipse.tycho.core.facade.TargetEnvironment;
 import org.eclipse.tycho.core.resolver.shared.OptionalResolutionAction;
 import org.eclipse.tycho.p2.metadata.IDependencyMetadata;
 import org.eclipse.tycho.p2.resolver.P2MetadataProvider;
 
-@Component(role = P2MetadataProvider.class)
+@Named
 public class AggregatedP2MetadataProvider implements P2MetadataProvider
 {
    @Override
