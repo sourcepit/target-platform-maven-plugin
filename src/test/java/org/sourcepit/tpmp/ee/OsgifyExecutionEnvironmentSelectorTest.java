@@ -16,7 +16,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import javax.inject.Inject;
-import javax.validation.ConstraintViolationException;
+import java.lang.IllegalArgumentException;
 
 import org.eclipse.sisu.launch.InjectedTest;
 import org.junit.Test;
@@ -34,7 +34,7 @@ public class OsgifyExecutionEnvironmentSelectorTest extends InjectedTest
          selector.select(null);
          fail();
       }
-      catch (ConstraintViolationException e)
+      catch (IllegalArgumentException e)
       {
          // as expected
       }

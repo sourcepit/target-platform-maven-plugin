@@ -6,7 +6,7 @@
 
 package org.sourcepit.tpmp;
 
-import javax.validation.constraints.NotNull;
+import org.sourcepit.common.constraints.NotNull;
 
 public class TargetEnvironment
 {

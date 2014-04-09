@@ -11,7 +11,7 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.LinkedHashSet;
 
-import javax.validation.constraints.NotNull;
+import org.sourcepit.common.constraints.NotNull;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.maven.project.MavenProject;
