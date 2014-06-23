@@ -9,6 +9,7 @@ package org.sourcepit.tpmp.resolver.tycho;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -54,7 +55,7 @@ public class TychoSessionTargetPlatformResolver extends AbstractTychoTargetPlatf
 {
    @Inject
    private ExecutionEnvironmentSelector eeSelector;
-   
+
    @Inject
    private Logger logger;
 
@@ -180,33 +181,20 @@ public class TychoSessionTargetPlatformResolver extends AbstractTychoTargetPlatf
       tychoProject.readExecutionEnvironmentConfiguration(fake, eeConfiguration);
       fake.setContextValue(TychoConstants.CTX_EXECUTION_ENVIRONMENT_CONFIGURATION, eeConfiguration);
 
-      Map<String, DependencyMetadata> metadata = new LinkedHashMap<String, DependencyMetadata>();
-
       Map<String, ReactorProject> vidToProjectMap = new HashMap<String, ReactorProject>();
+
+      final DependencyMetadata dm = new DependencyMetadata();
 
       for (ReactorProject reactorProject : DefaultReactorProject.adapt(session))
       {
          String vid = reactorProject.getId() + "_" + reactorProject.getVersion();
          vidToProjectMap.put(vid, reactorProject);
 
-
-         final Map<String, Set<Object>> dependencyMetadata = reactorProject.getDependencyMetadata();
-         if (dependencyMetadata != null)
-         {
-            for (String classifier : dependencyMetadata.keySet())
-            {
-               DependencyMetadata dm = metadata.get(classifier);
-               if (dm == null)
-               {
-                  dm = new DependencyMetadata();
-                  metadata.put(classifier, dm);
-               }
-
-               mergeMetadata(dm, reactorProject, classifier, true);
-               mergeMetadata(dm, reactorProject, classifier, false);
-            }
-         }
+         mergeMetadata(dm, reactorProject, true);
+         mergeMetadata(dm, reactorProject, false);
       }
+      Map<String, DependencyMetadata> metadata = new LinkedHashMap<String, DependencyMetadata>();
+      metadata.put(null, dm);
 
       fake.setContextValue("tpmp.aggregatedMetadata", metadata);
 
@@ -216,8 +204,8 @@ public class TychoSessionTargetPlatformResolver extends AbstractTychoTargetPlatf
    private static class DependencyMetadata implements IDependencyMetadata
    {
 
-      private Set<Object> metadata;
-      private Set<Object> secondaryMetadata;
+      private Set<Object> metadata = new LinkedHashSet<Object>(0);
+      private Set<Object> secondaryMetadata = new LinkedHashSet<Object>(0);
 
       public Set<Object /* IInstallableUnit */> getMetadata(boolean primary)
       {
@@ -246,9 +234,9 @@ public class TychoSessionTargetPlatformResolver extends AbstractTychoTargetPlatf
 
    }
 
-   private void mergeMetadata(DependencyMetadata dm, ReactorProject reactorProject, String classifier, boolean primary)
+   private void mergeMetadata(DependencyMetadata dm, ReactorProject reactorProject, boolean primary)
    {
-      Set<Object> dependencyMetadata = reactorProject.getDependencyMetadata(classifier, primary);
+      Set<?> dependencyMetadata = reactorProject.getDependencyMetadata(primary);
       if (dependencyMetadata != null && !dependencyMetadata.isEmpty())
       {
          Set<Object> merged = dm.getMetadata(primary);

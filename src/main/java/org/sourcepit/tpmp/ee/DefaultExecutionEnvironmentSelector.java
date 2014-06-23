@@ -16,8 +16,8 @@ import org.sourcepit.common.constraints.NotNull;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.sourcepit.osgify.core.ee.ExecutionEnvironment;
-import org.sourcepit.osgify.core.ee.ExecutionEnvironmentService;
+import org.sourcepit.osgifier.core.ee.ExecutionEnvironment;
+import org.sourcepit.osgifier.core.ee.ExecutionEnvironmentService;
 
 @Named
 public class DefaultExecutionEnvironmentSelector implements ExecutionEnvironmentSelector

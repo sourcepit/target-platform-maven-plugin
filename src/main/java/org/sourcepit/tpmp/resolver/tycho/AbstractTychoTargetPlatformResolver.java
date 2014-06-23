@@ -150,16 +150,21 @@ public class AbstractTychoTargetPlatformResolver
 
       for (ArtifactDescriptor artifact : platformArtifacts.getArtifacts())
       {
-         final Optional<MavenProject> mavenProject = projectFacade.getMavenProject(vidToProjectMap, artifact);
-
-         final ArtifactKey key = projectFacade.getArtifactKey(artifact, mavenProject);
-         final String type = key.getType();
-         if (ArtifactKey.TYPE_ECLIPSE_PLUGIN.equals(type) || ArtifactKey.TYPE_ECLIPSE_TEST_PLUGIN.equals(type))
+         // Pre Tycho 0.20.0 source artifacts was typed as "eclipse-repository"... Now source artifacts are
+         // eclipse-plugins. Because of we will resolve sources later, ignore it here.
+         if (!"sources".equals(artifact.getClassifier()))
          {
-            final boolean explodedBundle = isExplodedBundle(key.getId(),
-               projectFacade.getLocation(artifact, mavenProject), explodedBundles);
-            resolutionHandler.handlePlugin(key.getId(), key.getVersion(),
-               projectFacade.getLocation(artifact, mavenProject), explodedBundle, mavenProject.orNull());
+            final Optional<MavenProject> mavenProject = projectFacade.getMavenProject(vidToProjectMap, artifact);
+
+            final ArtifactKey key = projectFacade.getArtifactKey(artifact, mavenProject);
+            final String type = key.getType();
+            if (ArtifactKey.TYPE_ECLIPSE_PLUGIN.equals(type) || ArtifactKey.TYPE_ECLIPSE_TEST_PLUGIN.equals(type))
+            {
+               final boolean explodedBundle = isExplodedBundle(key.getId(),
+                  projectFacade.getLocation(artifact, mavenProject), explodedBundles);
+               resolutionHandler.handlePlugin(key.getId(), key.getVersion(),
+                  projectFacade.getLocation(artifact, mavenProject), explodedBundle, mavenProject.orNull());
+            }
          }
       }
    }
