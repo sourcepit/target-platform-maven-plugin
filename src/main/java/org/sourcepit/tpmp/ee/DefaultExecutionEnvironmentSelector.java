@@ -32,6 +32,7 @@ public class DefaultExecutionEnvironmentSelector implements ExecutionEnvironment
       this.eeService = eeService;
    }
 
+   @Override
    public String select(@NotNull Collection<String> executionEnvironments)
    {
       if (executionEnvironments.isEmpty())

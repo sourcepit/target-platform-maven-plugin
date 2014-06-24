@@ -101,11 +101,13 @@ public class AbstractTychoTargetPlatformResolver
 
       final DependencyResolverConfiguration resolverConfiguration = new DependencyResolverConfiguration()
       {
+         @Override
          public OptionalResolutionAction getOptionalResolutionAction()
          {
             return OptionalResolutionAction.OPTIONAL;
          }
 
+         @Override
          public List<Dependency> getExtraRequirements()
          {
             return extraRequirements;
@@ -280,11 +282,13 @@ public class AbstractTychoTargetPlatformResolver
          this.delegate = delegate;
       }
 
+      @Override
       public void handleFeature(String id, String version, File location, MavenProject mavenProject)
       {
          delegate.handleFeature(id, version, location, mavenProject);
       }
 
+      @Override
       public void handlePlugin(String id, String version, File location, boolean unpack, MavenProject mavenProject)
       {
          plugins.add(id + "_" + version);

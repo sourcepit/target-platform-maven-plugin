@@ -252,6 +252,7 @@ public class TpmpIT extends ExternalMavenTest
    {
       final File[] junitPlugins = dir.listFiles(new FileFilter()
       {
+         @Override
          public boolean accept(File file)
          {
             return file.getName().startsWith(prefix);

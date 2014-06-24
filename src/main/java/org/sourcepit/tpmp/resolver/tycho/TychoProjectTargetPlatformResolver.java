@@ -28,6 +28,7 @@ public class TychoProjectTargetPlatformResolver extends AbstractTychoTargetPlatf
    implements
       ProjectTargetPlatformResolver
 {
+   @Override
    public void resolveTargetPlatformConfiguration(MavenSession session, MavenProject project,
       TargetPlatformConfigurationHandler handler)
    {
@@ -50,6 +51,7 @@ public class TychoProjectTargetPlatformResolver extends AbstractTychoTargetPlatf
       }
    }
 
+   @Override
    public void resolveTargetPlatform(MavenSession session, MavenProject project, boolean includeSource,
       TargetPlatformResolutionHandler handler)
    {

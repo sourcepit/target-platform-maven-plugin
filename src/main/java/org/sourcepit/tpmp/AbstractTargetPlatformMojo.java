@@ -66,6 +66,7 @@ public abstract class AbstractTargetPlatformMojo extends AbstractMojo
    @Inject
    private Map<String, TargetPlatformResolver> resolverMap;
 
+   @Override
    public final void execute() throws MojoExecutionException, MojoFailureException
    {
       try

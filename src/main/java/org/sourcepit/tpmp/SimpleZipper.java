@@ -34,6 +34,7 @@ public class SimpleZipper
          {
             org.sourcepit.common.utils.file.FileUtils.accept(platformDir, new FileVisitor()
             {
+               @Override
                public boolean visit(File file)
                {
                   if (!file.equals(platformDir))

@@ -9,7 +9,6 @@ package org.sourcepit.tpmp.resolver.tycho;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -59,14 +58,13 @@ public class TychoSessionTargetPlatformResolver extends AbstractTychoTargetPlatf
    @Inject
    private Logger logger;
 
+   @Override
    public boolean isRelyingOnCachedFiles()
    {
       return false;
    }
 
-   /**
-    * {@inheritDoc}
-    */
+   @Override
    public void resolve(MavenSession session, File platformDir, boolean includeSource, boolean forceUpdate,
       TargetPlatformConfigurationHandler configHandler, TargetPlatformResolutionHandler resolutionHandler)
    {
@@ -207,11 +205,13 @@ public class TychoSessionTargetPlatformResolver extends AbstractTychoTargetPlatf
       private Set<Object> metadata = new LinkedHashSet<Object>(0);
       private Set<Object> secondaryMetadata = new LinkedHashSet<Object>(0);
 
+      @Override
       public Set<Object /* IInstallableUnit */> getMetadata(boolean primary)
       {
          return primary ? metadata : secondaryMetadata;
       }
 
+      @Override
       public Set<Object /* IInstallableUnit */> getMetadata()
       {
          LinkedHashSet<Object> result = new LinkedHashSet<Object>();

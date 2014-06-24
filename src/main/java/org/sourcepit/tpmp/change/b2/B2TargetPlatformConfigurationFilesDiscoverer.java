@@ -32,6 +32,7 @@ public class B2TargetPlatformConfigurationFilesDiscoverer extends TychoTargetPla
       super(projectTypes);
    }
 
+   @Override
    public List<File> getTargetPlatformConfigurationFiles(MavenSession session, MavenProject project)
    {
       final List<File> files = new ArrayList<File>();

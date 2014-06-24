@@ -48,7 +48,7 @@ public class TychoSurefirePluginConfigurationReader
          }
          else if ("useUIHarness".equals(tagName))
          {
-            result.setUseUIHarness(Boolean.valueOf(extractNonEmptyValue(child)));
+            result.setUseUIHarness(Boolean.valueOf(extractNonEmptyValue(child)).booleanValue());
          }
       }
    }

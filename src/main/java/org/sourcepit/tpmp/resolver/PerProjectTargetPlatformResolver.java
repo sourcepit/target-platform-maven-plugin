@@ -28,6 +28,7 @@ public class PerProjectTargetPlatformResolver implements TargetPlatformResolver
    @Inject
    private ProjectTargetPlatformResolver tpResolver;
 
+   @Override
    public boolean isRelyingOnCachedFiles()
    {
       return true;
@@ -38,6 +39,7 @@ public class PerProjectTargetPlatformResolver implements TargetPlatformResolver
       return logger;
    }
 
+   @Override
    public void resolve(MavenSession session, File platformDir, boolean includeSource, boolean forceUpdate,
       TargetPlatformConfigurationHandler configHandler, TargetPlatformResolutionHandler resolutionHandler)
    {

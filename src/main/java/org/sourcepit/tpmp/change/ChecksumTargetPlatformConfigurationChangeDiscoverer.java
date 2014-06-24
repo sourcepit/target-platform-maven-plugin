@@ -56,6 +56,7 @@ public class ChecksumTargetPlatformConfigurationChangeDiscoverer implements Targ
       this.configFilesDiscovererMap = configFilesDiscovererMap;
    }
 
+   @Override
    public boolean hasTargetPlatformConfigurationChanged(File statusCacheDir, MavenSession session, MavenProject project)
    {
       // always update project checksums
@@ -74,6 +75,7 @@ public class ChecksumTargetPlatformConfigurationChangeDiscoverer implements Targ
       return false;
    }
 
+   @Override
    public void clearTargetPlatformConfigurationStausCache(File statusCacheDir, MavenProject project)
    {
       final File checksumFile = new File(statusCacheDir, "project-status.properties");
@@ -314,7 +316,7 @@ public class ChecksumTargetPlatformConfigurationChangeDiscoverer implements Targ
          formatter = new Formatter();
          for (byte b : hash)
          {
-            formatter.format("%02x", b);
+            formatter.format("%02x", Byte.valueOf(b));
          }
          return formatter.toString();
       }

@@ -37,6 +37,7 @@ public class TychoTargetPlatformConfigurationFilesDiscoverer implements TargetPl
       this.projectTypes = projectTypes;
    }
 
+   @Override
    public List<File> getTargetPlatformConfigurationFiles(MavenSession session, MavenProject project)
    {
       final List<File> files = new ArrayList<File>();

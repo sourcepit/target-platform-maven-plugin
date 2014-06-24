@@ -62,16 +62,19 @@ public class CopyTargetPlatformResolutionHandler implements TargetPlatformResolu
       return executionEnvironments;
    }
 
+   @Override
    public void handleTargetEnvironment(@NotNull String os, @NotNull String ws, @NotNull String arch)
    {
       targetEnvironments.add(new TargetEnvironment(os, ws, arch));
    }
 
+   @Override
    public void handleExecutionEnvironment(@NotNull String ee)
    {
       executionEnvironments.add(ee);
    }
 
+   @Override
    public void handleFeature(@NotNull String id, @NotNull String version, @NotNull File location,
       MavenProject mavenProject)
    {
@@ -81,6 +84,7 @@ public class CopyTargetPlatformResolutionHandler implements TargetPlatformResolu
       }
    }
 
+   @Override
    public void handlePlugin(@NotNull String id, @NotNull String version, @NotNull File location, boolean unpack,
       MavenProject mavenProject)
    {
