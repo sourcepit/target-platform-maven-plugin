@@ -333,7 +333,7 @@ public class TychoSourceIUResolver
 
       public P2TargetPlatformDAO(ClassLoader classLoader)
       {
-         super(classLoader, "org.eclipse.tycho.artifacts.p2.P2TargetPlatform");
+         super(classLoader, "org.eclipse.tycho.p2.target.P2TargetPlatform");
       }
 
       public InstallableUnitDAO getInstallableUnitDAO()
@@ -355,7 +355,7 @@ public class TychoSourceIUResolver
       }
    }
 
-   private static class InstallableUnitDAO extends AbstractDAO
+   static class InstallableUnitDAO extends AbstractDAO
    {
       private TouchpointDataDAO tdDAO;
 
@@ -363,10 +363,11 @@ public class TychoSourceIUResolver
       private Method getVersion;
       private Method getProvidedCapabilities;
       private Method getTouchpointData;
+      private Method setProperty;
 
       public InstallableUnitDAO(ClassLoader classLoader)
       {
-         super(classLoader, "org.eclipse.equinox.p2.metadata.IInstallableUnit");
+         super(classLoader, "org.eclipse.equinox.internal.p2.metadata.InstallableUnit");
       }
 
       public TouchpointDataDAO getTouchpointDataDAO()
@@ -412,6 +413,15 @@ public class TychoSourceIUResolver
             getTouchpointData = getMethod("getTouchpointData");
          }
          return invoke(getTouchpointData, unit);
+      }
+
+      public String setProperty(Object unit, String key, String value)
+      {
+         if (setProperty == null)
+         {
+            setProperty = getMethod("setProperty", String.class, String.class);
+         }
+         return invoke(setProperty, unit, key, value);
       }
    }
 

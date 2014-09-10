@@ -32,16 +32,17 @@ import org.apache.maven.project.MavenProject;
 import org.apache.maven.repository.RepositorySystem;
 import org.eclipse.tycho.ArtifactDescriptor;
 import org.eclipse.tycho.ArtifactKey;
+import org.eclipse.tycho.PackagingType;
 import org.eclipse.tycho.ReactorProject;
 import org.eclipse.tycho.artifacts.DependencyArtifacts;
 import org.eclipse.tycho.artifacts.TargetPlatform;
+import org.eclipse.tycho.core.DependencyResolver;
 import org.eclipse.tycho.core.DependencyResolverConfiguration;
 import org.eclipse.tycho.core.TargetPlatformConfiguration;
-import org.eclipse.tycho.core.TargetPlatformResolver;
 import org.eclipse.tycho.core.TychoProject;
 import org.eclipse.tycho.core.osgitools.BundleReader;
 import org.eclipse.tycho.core.osgitools.OsgiManifest;
-import org.eclipse.tycho.core.resolver.DefaultTargetPlatformResolverFactory;
+import org.eclipse.tycho.core.resolver.DefaultDependencyResolverFactory;
 import org.eclipse.tycho.core.resolver.shared.OptionalResolutionAction;
 import org.sourcepit.common.utils.io.IOOperation;
 import org.sourcepit.common.utils.xml.XmlUtils;
@@ -59,7 +60,7 @@ public class AbstractTychoTargetPlatformResolver
    private MavenProjectFacade projectFacade;
 
    @Inject
-   private DefaultTargetPlatformResolverFactory targetPlatformResolverLocator;
+   private DefaultDependencyResolverFactory targetPlatformResolverLocator;
 
    @Inject
    private RepositorySystem repositorySystem;
@@ -94,10 +95,10 @@ public class AbstractTychoTargetPlatformResolver
       List<ReactorProject> reactorProjects, TargetPlatformResolutionHandler resolutionHandler,
       final Set<String> explodedBundles, final List<Dependency> extraRequirements)
    {
-      final TargetPlatformResolver platformResolver = targetPlatformResolverLocator.lookupPlatformResolver(project);
+      final DependencyResolver platformResolver = targetPlatformResolverLocator.lookupDependencyResolver(project);
 
-      final TargetPlatform targetPlatform = platformResolver.computeTargetPlatform(session, project, reactorProjects,
-         false);
+      final TargetPlatform targetPlatform = platformResolver.computePreliminaryTargetPlatform(session, project,
+         reactorProjects);
 
       final DependencyResolverConfiguration resolverConfiguration = new DependencyResolverConfiguration()
       {
@@ -117,22 +118,28 @@ public class AbstractTychoTargetPlatformResolver
       final DependencyArtifacts platformArtifacts = platformResolver.resolveDependencies(session, project,
          targetPlatform, reactorProjects, resolverConfiguration);
 
-      handlePluginsAndFeatures(session, platformArtifacts, explodedBundles, resolutionHandler);
+      handlePluginsAndFeatures(session, project, platformArtifacts, explodedBundles, resolutionHandler);
 
       return targetPlatform;
    }
 
-   private void handlePluginsAndFeatures(MavenSession session, final DependencyArtifacts platformArtifacts,
-      final Set<String> explodedBundles, TargetPlatformResolutionHandler resolutionHandler)
+   private void handlePluginsAndFeatures(MavenSession session, MavenProject project,
+      final DependencyArtifacts platformArtifacts, final Set<String> explodedBundles,
+      TargetPlatformResolutionHandler resolutionHandler)
    {
       // map original rector projects to their versioned id. needed to recognize and re-map reactor artifacts later
       final Map<String, MavenProject> vidToProjectMap = projectFacade.createVidToProjectMap(session);
 
-      for (ArtifactDescriptor artifact : platformArtifacts.getArtifacts(ArtifactKey.TYPE_ECLIPSE_FEATURE))
+      for (ArtifactDescriptor artifact : platformArtifacts.getArtifacts(PackagingType.TYPE_ECLIPSE_FEATURE))
       {
          final Optional<MavenProject> mavenProject = projectFacade.getMavenProject(vidToProjectMap, artifact);
 
          final File location = projectFacade.getLocation(artifact, mavenProject);
+
+         if (project.getBasedir().equals(location))
+         {
+            continue;
+         }
 
          // due to the feature model of Tycho violates the specified behaviour of the "unpack" attribute, we have to
          // parse the feature.xml on our own. See https://bugs.eclipse.org/bugs/show_bug.cgi?id=386851.
@@ -157,15 +164,19 @@ public class AbstractTychoTargetPlatformResolver
          if (!"sources".equals(artifact.getClassifier()))
          {
             final Optional<MavenProject> mavenProject = projectFacade.getMavenProject(vidToProjectMap, artifact);
+            final File location = projectFacade.getLocation(artifact, mavenProject);
+            if (project.getBasedir().equals(location))
+            {
+                continue;
+            }
 
             final ArtifactKey key = projectFacade.getArtifactKey(artifact, mavenProject);
             final String type = key.getType();
-            if (ArtifactKey.TYPE_ECLIPSE_PLUGIN.equals(type) || ArtifactKey.TYPE_ECLIPSE_TEST_PLUGIN.equals(type))
+            if (PackagingType.TYPE_ECLIPSE_PLUGIN.equals(type) || PackagingType.TYPE_ECLIPSE_TEST_PLUGIN.equals(type))
             {
-               final boolean explodedBundle = isExplodedBundle(key.getId(),
-                  projectFacade.getLocation(artifact, mavenProject), explodedBundles);
-               resolutionHandler.handlePlugin(key.getId(), key.getVersion(),
-                  projectFacade.getLocation(artifact, mavenProject), explodedBundle, mavenProject.orNull());
+               final boolean explodedBundle = isExplodedBundle(key.getId(), location, explodedBundles);
+               resolutionHandler.handlePlugin(key.getId(), key.getVersion(), location, explodedBundle,
+                  mavenProject.orNull());
             }
          }
       }

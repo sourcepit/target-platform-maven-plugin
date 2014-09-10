@@ -17,7 +17,7 @@
 	</scm>
 
 	<properties>
-		<tycho.version>0.20.0</tycho.version>
+		<tycho.version>0.21.0</tycho.version>
 		<it.maven.version>${maven.version}</it.maven.version>
 		<it.dir>${project.build.directory}/it</it.dir>
 		<it.bin.dir>${it.dir}/bin</it.bin.dir>
@@ -66,7 +66,7 @@
 			<dependency>
 				<groupId>org.sourcepit.osgifier</groupId>
 				<artifactId>org.sourcepit.osgifier.core</artifactId>
-				<version>0.19.0</version>
+				<version>0.20.0-SNAPSHOT</version>
 			</dependency>
 			<dependency>
 				<groupId>org.eclipse.tycho</groupId>
@@ -204,7 +204,6 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-release-plugin</artifactId>
-					<version>2.4.1</version>
 					<configuration>
 						<preparationGoals>clean</preparationGoals>
 					</configuration>

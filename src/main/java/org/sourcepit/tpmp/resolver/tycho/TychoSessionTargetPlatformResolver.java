@@ -9,7 +9,6 @@ package org.sourcepit.tpmp.resolver.tycho;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -40,12 +39,14 @@ import org.eclipse.tycho.core.osgitools.AbstractTychoProject;
 import org.eclipse.tycho.core.osgitools.DefaultReactorProject;
 import org.eclipse.tycho.core.utils.TychoProjectUtils;
 import org.eclipse.tycho.p2.metadata.IDependencyMetadata;
+import org.eclipse.tycho.p2.repository.RepositoryLayoutHelper;
 import org.sourcepit.common.utils.props.LinkedPropertiesMap;
 import org.sourcepit.common.utils.props.PropertiesMap;
 import org.sourcepit.tpmp.ee.ExecutionEnvironmentSelector;
 import org.sourcepit.tpmp.resolver.TargetPlatformConfigurationHandler;
 import org.sourcepit.tpmp.resolver.TargetPlatformResolutionHandler;
 import org.sourcepit.tpmp.resolver.TargetPlatformResolver;
+import org.sourcepit.tpmp.resolver.tycho.TychoSourceIUResolver.InstallableUnitDAO;
 
 @Named("per-session")
 public class TychoSessionTargetPlatformResolver extends AbstractTychoTargetPlatformResolver
@@ -179,18 +180,28 @@ public class TychoSessionTargetPlatformResolver extends AbstractTychoTargetPlatf
       tychoProject.readExecutionEnvironmentConfiguration(fake, eeConfiguration);
       fake.setContextValue(TychoConstants.CTX_EXECUTION_ENVIRONMENT_CONFIGURATION, eeConfiguration);
 
-      Map<String, ReactorProject> vidToProjectMap = new HashMap<String, ReactorProject>();
-
       final DependencyMetadata dm = new DependencyMetadata();
-
       for (ReactorProject reactorProject : DefaultReactorProject.adapt(session))
       {
-         String vid = reactorProject.getId() + "_" + reactorProject.getVersion();
-         vidToProjectMap.put(vid, reactorProject);
-
          mergeMetadata(dm, reactorProject, true);
          mergeMetadata(dm, reactorProject, false);
       }
+
+      int i = 0;
+      for (Object object : dm.getMetadata(true))
+      {
+         InstallableUnitDAO dao = new TychoSourceIUResolver.InstallableUnitDAO(object.getClass().getClassLoader());
+         dao.setProperty(object, RepositoryLayoutHelper.PROP_CLASSIFIER, "fake_" + i);
+         i++;
+      }
+      
+      for (Object object : dm.getMetadata(false))
+      {
+         InstallableUnitDAO dao = new TychoSourceIUResolver.InstallableUnitDAO(object.getClass().getClassLoader());
+         dao.setProperty(object, RepositoryLayoutHelper.PROP_CLASSIFIER, "fake_" + i);
+         i++;
+      }
+
       Map<String, DependencyMetadata> metadata = new LinkedHashMap<String, DependencyMetadata>();
       metadata.put(null, dm);
 
