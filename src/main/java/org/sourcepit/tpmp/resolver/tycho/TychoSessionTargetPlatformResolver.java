@@ -44,9 +44,9 @@ import org.eclipse.tycho.core.TychoConstants;
 import org.eclipse.tycho.core.TychoProject;
 import org.eclipse.tycho.core.ee.ExecutionEnvironmentConfigurationImpl;
 import org.eclipse.tycho.core.ee.shared.ExecutionEnvironmentConfiguration;
-import org.eclipse.tycho.core.facade.TargetEnvironment;
 import org.eclipse.tycho.core.osgitools.AbstractTychoProject;
 import org.eclipse.tycho.core.osgitools.DefaultReactorProject;
+import org.eclipse.tycho.core.shared.TargetEnvironment;
 import org.eclipse.tycho.core.utils.TychoProjectUtils;
 import org.eclipse.tycho.p2.metadata.IDependencyMetadata;
 import org.eclipse.tycho.p2.repository.RepositoryLayoutHelper;
@@ -186,7 +186,8 @@ public class TychoSessionTargetPlatformResolver extends AbstractTychoTargetPlatf
 
       fake.setContextValue(TychoConstants.CTX_TARGET_PLATFORM_CONFIGURATION, aggregatedConfiguration);
 
-      ExecutionEnvironmentConfiguration eeConfiguration = new ExecutionEnvironmentConfigurationImpl(logger);
+      ExecutionEnvironmentConfiguration eeConfiguration = new ExecutionEnvironmentConfigurationImpl(logger,
+         aggregatedConfiguration.isResolveWithEEConstraints());
       tychoProject.readExecutionEnvironmentConfiguration(fake, eeConfiguration);
       fake.setContextValue(TychoConstants.CTX_EXECUTION_ENVIRONMENT_CONFIGURATION, eeConfiguration);
 
@@ -299,9 +300,15 @@ public class TychoSessionTargetPlatformResolver extends AbstractTychoTargetPlatf
             }
 
             final boolean implicitTargetEnvironment = aggregatedPlatform.isImplicitTargetEnvironment();
-            if (!implicitTargetEnvironment)
+            if (implicitTargetEnvironment)
             {
                aggregatedPlatform.setImplicitTargetEnvironment(configuration.isImplicitTargetEnvironment());
+            }
+            
+            final boolean resolveWithEEConstraints = aggregatedPlatform.isResolveWithEEConstraints();
+            if (resolveWithEEConstraints)
+            {
+               aggregatedPlatform.setResolveWithEEContraints(configuration.isResolveWithEEConstraints());
             }
 
             final boolean includePackedArtifacts = aggregatedPlatform.isIncludePackedArtifacts();

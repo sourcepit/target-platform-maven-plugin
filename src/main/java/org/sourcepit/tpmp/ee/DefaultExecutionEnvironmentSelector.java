@@ -22,10 +22,10 @@ import java.util.List;
 
 import javax.inject.Inject;
 import javax.inject.Named;
-import org.sourcepit.common.constraints.NotNull;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.sourcepit.common.constraints.NotNull;
 import org.sourcepit.osgifier.core.ee.ExecutionEnvironment;
 import org.sourcepit.osgifier.core.ee.ExecutionEnvironmentService;
 

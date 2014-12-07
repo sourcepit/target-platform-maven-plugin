@@ -33,7 +33,7 @@
 	</scm>
 
 	<properties>
-		<tycho.version>0.21.0</tycho.version>
+		<tycho.version>0.22.0</tycho.version>
 		<it.maven.version>${maven.version}</it.maven.version>
 		<it.dir>${project.build.directory}/it</it.dir>
 		<it.bin.dir>${it.dir}/bin</it.bin.dir>
