@@ -16,6 +16,8 @@
 
 package org.sourcepit.tpmp;
 
+import static org.sourcepit.common.utils.file.FileUtils.deleteFileOrDirectory;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
@@ -119,7 +121,7 @@ public class CopyTargetPlatformResolutionHandler
             {
                if (pluginJar.exists())
                {
-                  FileUtils.forceDelete(pluginJar);
+                  deleteFileOrDirectory(pluginJar);
                }
                if (!pluginDir.exists())
                {
@@ -138,7 +140,7 @@ public class CopyTargetPlatformResolutionHandler
          {
             if (pluginJar.exists())
             {
-               FileUtils.forceDelete(pluginJar);
+               deleteFileOrDirectory(pluginJar);
             }
             if (!pluginDir.exists())
             {

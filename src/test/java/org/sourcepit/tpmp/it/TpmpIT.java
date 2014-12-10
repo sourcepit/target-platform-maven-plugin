@@ -20,6 +20,7 @@ import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
+import static org.sourcepit.common.utils.file.FileUtils.deleteFileOrDirectory;
 
 import java.io.File;
 import java.io.FileFilter;
@@ -156,8 +157,8 @@ public class TpmpIT extends ExternalMavenTest
       final File metadataDir = new File(platformDir, ".tpmp");
       assertTrue(metadataDir.exists());
 
-      FileUtils.forceDelete(featuresDir);
-      FileUtils.forceDelete(pluginsDir);
+      deleteFileOrDirectory(featuresDir);
+      deleteFileOrDirectory(pluginsDir);
 
       build(projectDir, "-Dtycho.mode=maven", "-e", "-B", "org.sourcepit:target-platform-maven-plugin:"
          + projectVersion + ":materialize", "-Dtpmp.resolutionStrategy=per-project");
