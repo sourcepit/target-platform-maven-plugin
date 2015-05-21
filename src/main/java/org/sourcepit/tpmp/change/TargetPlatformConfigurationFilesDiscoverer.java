@@ -22,7 +22,6 @@ import java.util.List;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.project.MavenProject;
 
-public interface TargetPlatformConfigurationFilesDiscoverer
-{
+public interface TargetPlatformConfigurationFilesDiscoverer {
    List<File> getTargetPlatformConfigurationFiles(MavenSession session, MavenProject project);
 }

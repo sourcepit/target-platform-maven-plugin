@@ -18,7 +18,6 @@ package org.sourcepit.tpmp.ee;
 
 import java.util.Collection;
 
-public interface ExecutionEnvironmentSelector
-{
+public interface ExecutionEnvironmentSelector {
    String select(Collection<String> executionEnvironments);
 }

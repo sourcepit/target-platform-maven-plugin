@@ -18,40 +18,34 @@ package org.sourcepit.tpmp;
 
 import org.sourcepit.common.constraints.NotNull;
 
-public class TargetEnvironment
-{
+public class TargetEnvironment {
    private final String os;
 
    private final String ws;
 
    private final String arch;
 
-   public TargetEnvironment(@NotNull String os, @NotNull String ws, @NotNull String arch)
-   {
+   public TargetEnvironment(@NotNull String os, @NotNull String ws, @NotNull String arch) {
       super();
       this.os = os;
       this.ws = ws;
       this.arch = arch;
    }
 
-   public String getOs()
-   {
+   public String getOs() {
       return os;
    }
 
-   public String getWs()
-   {
+   public String getWs() {
       return ws;
    }
 
-   public String getArch()
-   {
+   public String getArch() {
       return arch;
    }
 
    @Override
-   public int hashCode()
-   {
+   public int hashCode() {
       final int prime = 31;
       int result = 1;
       result = prime * result + ((arch == null) ? 0 : arch.hashCode());
@@ -61,8 +55,7 @@ public class TargetEnvironment
    }
 
    @Override
-   public boolean equals(Object obj)
-   {
+   public boolean equals(Object obj) {
       if (this == obj)
          return true;
       if (obj == null)
@@ -70,22 +63,19 @@ public class TargetEnvironment
       if (getClass() != obj.getClass())
          return false;
       TargetEnvironment other = (TargetEnvironment) obj;
-      if (arch == null)
-      {
+      if (arch == null) {
          if (other.arch != null)
             return false;
       }
       else if (!arch.equals(other.arch))
          return false;
-      if (os == null)
-      {
+      if (os == null) {
          if (other.os != null)
             return false;
       }
       else if (!os.equals(other.os))
          return false;
-      if (ws == null)
-      {
+      if (ws == null) {
          if (other.ws != null)
             return false;
       }
@@ -95,8 +85,7 @@ public class TargetEnvironment
    }
 
    @Override
-   public String toString()
-   {
+   public String toString() {
       final StringBuilder sb = new StringBuilder();
       sb.append(os).append('/').append(ws).append('/').append(arch);
       return sb.toString();

@@ -20,8 +20,7 @@ import java.io.File;
 
 import org.apache.maven.project.MavenProject;
 
-public interface TargetPlatformResolutionHandler
-{
+public interface TargetPlatformResolutionHandler {
    void handleFeature(String id, String version, File location, MavenProject mavenProject);
 
    void handlePlugin(String id, String version, File location, boolean unpack, MavenProject mavenProject);

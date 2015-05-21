@@ -26,39 +26,32 @@ import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
 
-import org.apache.commons.io.FileUtils;
 import org.junit.Test;
 import org.sourcepit.common.maven.testing.ExternalMavenTest;
 import org.sourcepit.common.testing.Environment;
 
-public class TpmpIT extends ExternalMavenTest
-{
+public class TpmpIT extends ExternalMavenTest {
    @Override
-   protected boolean isDebug()
-   {
+   protected boolean isDebug() {
       return true;
    }
 
    @Override
-   protected Environment newEnvironment()
-   {
+   protected Environment newEnvironment() {
       return Environment.get("it-env.properties");
    }
 
    @Test
-   public void testReactor_PerSession() throws Exception
-   {
+   public void testReactor_PerSession() throws Exception {
       testReactor("per-session");
    }
 
    @Test
-   public void testReactor_PerProject() throws Exception
-   {
+   public void testReactor_PerProject() throws Exception {
       testReactor("per-project");
    }
 
-   private void testReactor(String strategy) throws IOException
-   {
+   private void testReactor(String strategy) throws IOException {
       final String projectVersion = getEnvironment().getProperty("project.version");
       final File projectDir = getResource("tycho-reactor");
       build(projectDir, "-e", "-B", "org.sourcepit:target-platform-maven-plugin:" + projectVersion + ":materialize",
@@ -88,25 +81,21 @@ public class TpmpIT extends ExternalMavenTest
       assertThat(junitPlugins[0].isDirectory(), is(true));
    }
 
-   private File getPlatformDir(final File projectDir)
-   {
+   private File getPlatformDir(final File projectDir) {
       return new File(projectDir, "target/" + projectDir.getName() + "-0.1.0-SNAPSHOT-target");
    }
 
    @Test
-   public void testReactorTychoModeMaven_PerSession() throws Exception
-   {
+   public void testReactorTychoModeMaven_PerSession() throws Exception {
       testReactorTychoModeMaven("per-session");
    }
 
    @Test
-   public void testReactorTychoModeMaven_PerProject() throws Exception
-   {
+   public void testReactorTychoModeMaven_PerProject() throws Exception {
       testReactorTychoModeMaven("per-project");
    }
 
-   private void testReactorTychoModeMaven(String strategy) throws IOException
-   {
+   private void testReactorTychoModeMaven(String strategy) throws IOException {
       final String projectVersion = getEnvironment().getProperty("project.version");
       final File projectDir = getResource("tycho-reactor");
       build(projectDir, "-Dtycho.mode=maven", "-e", "-B", "clean", "org.sourcepit:target-platform-maven-plugin:"
@@ -137,8 +126,7 @@ public class TpmpIT extends ExternalMavenTest
    }
 
    @Test
-   public void testTargetPlatformConfigurationNotChanged() throws Exception
-   {
+   public void testTargetPlatformConfigurationNotChanged() throws Exception {
       testReactorTychoModeMaven("per-project");
 
       final String projectVersion = getEnvironment().getProperty("project.version");
@@ -168,19 +156,16 @@ public class TpmpIT extends ExternalMavenTest
    }
 
    @Test
-   public void testTestPlugin_PerSession() throws Exception
-   {
+   public void testTestPlugin_PerSession() throws Exception {
       testTestPlugin("per-session");
    }
 
    @Test
-   public void testTestPlugin_PerProject() throws Exception
-   {
+   public void testTestPlugin_PerProject() throws Exception {
       testTestPlugin("per-project");
    }
 
-   private void testTestPlugin(String strategy) throws IOException
-   {
+   private void testTestPlugin(String strategy) throws IOException {
       final String projectVersion = getEnvironment().getProperty("project.version");
 
       final File reactorDir = getResource("tycho-reactor");
@@ -214,19 +199,16 @@ public class TpmpIT extends ExternalMavenTest
    }
 
    @Test
-   public void testPlugin_PerSession() throws Exception
-   {
+   public void testPlugin_PerSession() throws Exception {
       testPlugin("per-session");
    }
 
    @Test
-   public void testPlugin_PerProject() throws Exception
-   {
+   public void testPlugin_PerProject() throws Exception {
       testPlugin("per-project");
    }
 
-   private void testPlugin(String strategy) throws IOException
-   {
+   private void testPlugin(String strategy) throws IOException {
       final String projectVersion = getEnvironment().getProperty("project.version");
 
       final File reactorDir = getResource("tycho-reactor");
@@ -259,13 +241,10 @@ public class TpmpIT extends ExternalMavenTest
       assertThat(junitPlugins.length, is(0));
    }
 
-   private File[] collectFiles(final File dir, final String prefix)
-   {
-      final File[] junitPlugins = dir.listFiles(new FileFilter()
-      {
+   private File[] collectFiles(final File dir, final String prefix) {
+      final File[] junitPlugins = dir.listFiles(new FileFilter() {
          @Override
-         public boolean accept(File file)
-         {
+         public boolean accept(File file) {
             return file.getName().startsWith(prefix);
          }
       });

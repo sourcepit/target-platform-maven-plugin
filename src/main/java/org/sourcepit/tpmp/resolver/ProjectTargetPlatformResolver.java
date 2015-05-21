@@ -20,8 +20,7 @@ import org.apache.maven.execution.MavenSession;
 import org.apache.maven.project.MavenProject;
 
 
-public interface ProjectTargetPlatformResolver
-{
+public interface ProjectTargetPlatformResolver {
    void resolveTargetPlatformConfiguration(MavenSession session, MavenProject project,
       TargetPlatformConfigurationHandler handler);
 

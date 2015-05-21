@@ -36,37 +36,30 @@ import org.sourcepit.tpmp.resolver.TargetPlatformResolutionHandler;
 @Named
 public class TychoProjectTargetPlatformResolver extends AbstractTychoTargetPlatformResolver
    implements
-      ProjectTargetPlatformResolver
-{
+      ProjectTargetPlatformResolver {
    @Override
    public void resolveTargetPlatformConfiguration(MavenSession session, MavenProject project,
-      TargetPlatformConfigurationHandler handler)
-   {
-      if (getTychoProject(project) == null)
-      {
+      TargetPlatformConfigurationHandler handler) {
+      if (getTychoProject(project) == null) {
          return;
       }
 
       final TargetPlatformConfiguration configuration = getTargetPlatformConfiguration(session, project);
 
-      for (TargetEnvironment te : configuration.getEnvironments())
-      {
+      for (TargetEnvironment te : configuration.getEnvironments()) {
          handler.handleTargetEnvironment(te.getOs(), te.getWs(), te.getArch());
       }
 
       final String ee = configuration.getExecutionEnvironment();
-      if (ee != null)
-      {
+      if (ee != null) {
          handler.handleExecutionEnvironment(ee);
       }
    }
 
    @Override
    public void resolveTargetPlatform(MavenSession session, MavenProject project, boolean includeSource,
-      TargetPlatformResolutionHandler handler)
-   {
-      if (getTychoProject(project) == null)
-      {
+      TargetPlatformResolutionHandler handler) {
+      if (getTychoProject(project) == null) {
          return;
       }
 
@@ -77,10 +70,8 @@ public class TychoProjectTargetPlatformResolver extends AbstractTychoTargetPlatf
       final List<Dependency> frameworkExtensions = new ArrayList<Dependency>();
       extraRequirements.addAll(configuration.getDependencyResolverConfiguration().getExtraRequirements());
 
-      final TychoSurefirePluginConfiguration surefireConfiguration = new TychoSurefirePluginConfigurationReader()
-         .read(project);
-      if (surefireConfiguration != null)
-      {
+      final TychoSurefirePluginConfiguration surefireConfiguration = new TychoSurefirePluginConfigurationReader().read(project);
+      if (surefireConfiguration != null) {
          extraRequirements.addAll(surefireConfiguration.getDependencies());
          explodedBundles.addAll(surefireConfiguration.getExplodedBundles());
          frameworkExtensions.addAll(surefireConfiguration.getFrameworkExtensions());

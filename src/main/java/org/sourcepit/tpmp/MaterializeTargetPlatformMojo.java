@@ -36,8 +36,7 @@ import org.sourcepit.common.utils.lang.Exceptions;
  * @author Bernd Vogt <bernd.vogt@sourcepit.org>
  */
 @Mojo(name = "materialize", requiresProject = true, aggregator = true)
-public class MaterializeTargetPlatformMojo extends AbstractTargetPlatformMojo
-{
+public class MaterializeTargetPlatformMojo extends AbstractTargetPlatformMojo {
    @Parameter(property = "tpmp.attach", defaultValue = "true")
    private boolean attach;
 
@@ -56,8 +55,7 @@ public class MaterializeTargetPlatformMojo extends AbstractTargetPlatformMojo
    private MavenProjectHelper projectHelper;
 
    @Override
-   protected void doExecute()
-   {
+   protected void doExecute() {
       final MavenProject project = getSession().getCurrentProject();
 
       final File platformDir = getPlatformDir(project);
@@ -75,48 +73,37 @@ public class MaterializeTargetPlatformMojo extends AbstractTargetPlatformMojo
       deploy(getSession(), project, platformArtifact);
    }
 
-   private File zip(final MavenProject project, final File platformDir)
-   {
+   private File zip(final MavenProject project, final File platformDir) {
       final File platformZipFile = getPlatformZipFile(project);
       new SimpleZipper().zip(platformDir, platformZipFile, getClassifiedName(project));
       return platformZipFile;
    }
 
-   private void attach(MavenProject project, final Artifact platformArtifact)
-   {
-      if (attach)
-      {
+   private void attach(MavenProject project, final Artifact platformArtifact) {
+      if (attach) {
          projectHelper.attachArtifact(project, platformArtifact.getType(), platformArtifact.getClassifier(),
             platformArtifact.getFile());
       }
    }
 
-   private void install(MavenSession session, final Artifact platformArtifact)
-   {
-      if (install)
-      {
-         try
-         {
+   private void install(MavenSession session, final Artifact platformArtifact) {
+      if (install) {
+         try {
             installer.install(platformArtifact.getFile(), platformArtifact, session.getLocalRepository());
          }
-         catch (ArtifactInstallationException e)
-         {
+         catch (ArtifactInstallationException e) {
             throw Exceptions.pipe(e);
          }
       }
    }
 
-   private void deploy(MavenSession session, MavenProject project, final Artifact platformArtifact)
-   {
-      if (deploy)
-      {
-         try
-         {
+   private void deploy(MavenSession session, MavenProject project, final Artifact platformArtifact) {
+      if (deploy) {
+         try {
             deployer.deploy(platformArtifact.getFile(), platformArtifact,
                project.getDistributionManagementArtifactRepository(), session.getLocalRepository());
          }
-         catch (ArtifactDeploymentException e)
-         {
+         catch (ArtifactDeploymentException e) {
             throw Exceptions.pipe(e);
          }
       }

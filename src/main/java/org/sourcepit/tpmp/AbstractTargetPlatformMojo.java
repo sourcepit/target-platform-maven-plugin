@@ -44,8 +44,7 @@ import org.sourcepit.tpmp.ee.ExecutionEnvironmentSelector;
 import org.sourcepit.tpmp.resolver.TargetPlatformResolver;
 import org.w3c.dom.Document;
 
-public abstract class AbstractTargetPlatformMojo extends AbstractMojo
-{
+public abstract class AbstractTargetPlatformMojo extends AbstractMojo {
    @Inject
    protected LegacySupport buildContext;
 
@@ -77,14 +76,11 @@ public abstract class AbstractTargetPlatformMojo extends AbstractMojo
    private Map<String, TargetPlatformResolver> resolverMap;
 
    @Override
-   public final void execute() throws MojoExecutionException, MojoFailureException
-   {
-      try
-      {
+   public final void execute() throws MojoExecutionException, MojoFailureException {
+      try {
          doExecute();
       }
-      catch (PipedException e)
-      {
+      catch (PipedException e) {
          e.adaptAndThrow(MojoExecutionException.class);
          e.adaptAndThrow(MojoFailureException.class);
          throw e;
@@ -93,15 +89,13 @@ public abstract class AbstractTargetPlatformMojo extends AbstractMojo
 
    protected abstract void doExecute();
 
-   protected Artifact createPlatformArtifact(MavenProject project)
-   {
+   protected Artifact createPlatformArtifact(MavenProject project) {
       final Artifact platformArtifact = repositorySystem.createArtifactWithClassifier(project.getGroupId(),
          project.getArtifactId(), project.getVersion(), "zip", classifier);
       return platformArtifact;
    }
 
-   protected void updateTargetPlatform(final MavenProject project, final File platformDir)
-   {
+   protected void updateTargetPlatform(final MavenProject project, final File platformDir) {
       final TargetPlatformResolver resolver = getResolver();
 
       final CopyTargetPlatformResolutionHandler resolutionHandler = new CopyTargetPlatformResolutionHandler(platformDir);
@@ -113,29 +107,23 @@ public abstract class AbstractTargetPlatformMojo extends AbstractMojo
       writeDotProject(platformDir);
    }
 
-   protected MavenSession getSession()
-   {
+   protected MavenSession getSession() {
       return buildContext.getSession();
    }
 
-   private void writeDotProject(final File platformDir)
-   {
+   private void writeDotProject(final File platformDir) {
       final File dotProject = new File(platformDir.getParentFile(), ".project");
-      if (dotProject.exists())
-      {
+      if (dotProject.exists()) {
          getLog().info("Eclipse project description (.project) already exists, skipping creation of a new one.");
       }
-      else
-      {
+      else {
          getLog().info(
             "Writing Eclipse project description (.project) under " + dotProject.getParent()
                + ". You can import the project into your workspace afterwards.");
 
-         final Document doc = read(new FromStream<Document>()
-         {
+         final Document doc = read(new FromStream<Document>() {
             @Override
-            public Document read(InputStream inputStream) throws Exception
-            {
+            public Document read(InputStream inputStream) throws Exception {
                return XmlUtils.readXml(inputStream);
             }
          }, cpIn(getClass().getClassLoader(), "META-INF/tpmp/.project"));
@@ -145,21 +133,17 @@ public abstract class AbstractTargetPlatformMojo extends AbstractMojo
       }
    }
 
-   protected TargetPlatformResolver getResolver()
-   {
+   protected TargetPlatformResolver getResolver() {
       final TargetPlatformResolver resolver = resolverMap.get(resolutionStrategy);
-      if (resolver == null)
-      {
+      if (resolver == null) {
          throw new IllegalStateException("No resolver available for strategy '" + resolutionStrategy + "'");
       }
       return resolver;
    }
 
    protected void writeDefinitions(MavenProject project, File parentDir, String executionEnvironment,
-      Collection<TargetEnvironment> targetEnvironments)
-   {
-      for (TargetEnvironment targetEnvironment : targetEnvironments)
-      {
+      Collection<TargetEnvironment> targetEnvironments) {
+      for (TargetEnvironment targetEnvironment : targetEnvironments) {
          final String platformName = getTargetPlatformDefinitionName(project, targetEnvironment);
 
          final File targetFile = new File(parentDir, platformName + ".target");
@@ -169,8 +153,7 @@ public abstract class AbstractTargetPlatformMojo extends AbstractMojo
       }
    }
 
-   private String getTargetPlatformDefinitionName(MavenProject project, TargetEnvironment targetEnvironment)
-   {
+   private String getTargetPlatformDefinitionName(MavenProject project, TargetEnvironment targetEnvironment) {
       final StringBuilder sb = new StringBuilder();
       sb.append(getClassifiedName(project));
       sb.append('-');
@@ -182,31 +165,25 @@ public abstract class AbstractTargetPlatformMojo extends AbstractMojo
       return sb.toString();
    }
 
-   protected String selectExecutionEnvironment(Collection<String> executionEnvironments)
-   {
+   protected String selectExecutionEnvironment(Collection<String> executionEnvironments) {
       return eeSelector.select(executionEnvironments);
    }
 
-   protected File getPlatformZipFile(MavenProject project)
-   {
+   protected File getPlatformZipFile(MavenProject project) {
       return new File(targetDir, getClassifiedName(project) + ".zip");
    }
 
-   protected File getPlatformDir(MavenProject project)
-   {
+   protected File getPlatformDir(MavenProject project) {
       return new File(targetDir, getClassifiedName(project));
    }
 
-   protected String getClassifiedName(MavenProject project)
-   {
+   protected String getClassifiedName(MavenProject project) {
       return getFinalName(project) + "-" + classifier;
    }
 
-   protected String getFinalName(MavenProject project)
-   {
+   protected String getFinalName(MavenProject project) {
       String finalName = project.getBuild().getFinalName();
-      if (finalName == null)
-      {
+      if (finalName == null) {
          finalName = project.getArtifactId() + "-" + project.getVersion();
       }
       return finalName;

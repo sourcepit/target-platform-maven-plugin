@@ -21,8 +21,7 @@ import java.io.File;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.project.MavenProject;
 
-public interface TargetPlatformConfigurationChangeDiscoverer
-{
+public interface TargetPlatformConfigurationChangeDiscoverer {
    boolean hasTargetPlatformConfigurationChanged(File statusCacheDir, MavenSession session, MavenProject project);
 
    void clearTargetPlatformConfigurationStausCache(File statusCacheDir, MavenProject project);

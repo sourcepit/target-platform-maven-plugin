@@ -30,42 +30,34 @@ import org.sourcepit.osgifier.core.ee.ExecutionEnvironment;
 import org.sourcepit.osgifier.core.ee.ExecutionEnvironmentService;
 
 @Named
-public class DefaultExecutionEnvironmentSelector implements ExecutionEnvironmentSelector
-{
+public class DefaultExecutionEnvironmentSelector implements ExecutionEnvironmentSelector {
    private final ExecutionEnvironmentService eeService;
 
    private final Logger log = LoggerFactory.getLogger(getClass());
 
    @Inject
-   public DefaultExecutionEnvironmentSelector(ExecutionEnvironmentService eeService)
-   {
+   public DefaultExecutionEnvironmentSelector(ExecutionEnvironmentService eeService) {
       this.eeService = eeService;
    }
 
    @Override
-   public String select(@NotNull Collection<String> executionEnvironments)
-   {
-      if (executionEnvironments.isEmpty())
-      {
+   public String select(@NotNull Collection<String> executionEnvironments) {
+      if (executionEnvironments.isEmpty()) {
          return null;
       }
 
       final List<String> knownAndSortedIds = getKnownAndSortedIds();
 
       // check if we know each ee
-      for (String eeId : executionEnvironments)
-      {
-         if (!knownAndSortedIds.contains(eeId))
-         {
+      for (String eeId : executionEnvironments) {
+         if (!knownAndSortedIds.contains(eeId)) {
             log.warn("Unknown execution environment: " + eeId);
          }
       }
 
       // return highest known ee
-      for (String eeId : knownAndSortedIds)
-      {
-         if (executionEnvironments.contains(eeId))
-         {
+      for (String eeId : knownAndSortedIds) {
+         if (executionEnvironments.contains(eeId)) {
             return eeId;
          }
       }
@@ -77,13 +69,11 @@ public class DefaultExecutionEnvironmentSelector implements ExecutionEnvironment
       return executionEnvironments.iterator().next();
    }
 
-   private List<String> getKnownAndSortedIds()
-   {
+   private List<String> getKnownAndSortedIds() {
       final List<String> knownAndSortedIds = new ArrayList<String>();
 
       final List<ExecutionEnvironment> ees = eeService.getExecutionEnvironments();
-      for (int i = ees.size() - 1; i > -1; i--)
-      {
+      for (int i = ees.size() - 1; i > -1; i--) {
          final ExecutionEnvironment ee = ees.get(i);
          final String eeId = ee.getId();
          knownAndSortedIds.add(eeId);

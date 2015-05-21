@@ -31,20 +31,15 @@ import org.junit.Test;
 import org.sourcepit.common.maven.testing.EmbeddedMavenEnvironmentTest;
 import org.sourcepit.common.maven.testing.MavenExecutionResult2;
 import org.sourcepit.common.testing.Environment;
-import org.sourcepit.tpmp.resolver.tycho.TychoSurefirePluginConfiguration;
-import org.sourcepit.tpmp.resolver.tycho.TychoSurefirePluginConfigurationReader;
 
-public class TychoSurefirePluginConfigurationReaderTest extends EmbeddedMavenEnvironmentTest
-{
+public class TychoSurefirePluginConfigurationReaderTest extends EmbeddedMavenEnvironmentTest {
    @Override
-   protected Environment newEnvironment()
-   {
+   protected Environment newEnvironment() {
       return Environment.get("test-env.properties");
    }
 
    @Test
-   public void test() throws Exception
-   {
+   public void test() throws Exception {
       final File pom = getResource("TychoSurefirePluginConfigurationReaderTest/pom.xml");
 
       final MavenExecutionResult2 result = buildProject(pom);
@@ -73,41 +68,32 @@ public class TychoSurefirePluginConfigurationReaderTest extends EmbeddedMavenEnv
       assertDependency(dependencies.get(1), null, "eclipse.plugin", "0.0.0", "eclipse-plugin");
    }
 
-   private void assertDependency(Dependency actual, String groupId, String artifactId, String version, String type)
-   {
-      if (groupId == null)
-      {
+   private void assertDependency(Dependency actual, String groupId, String artifactId, String version, String type) {
+      if (groupId == null) {
          assertThat(actual.getGroupId(), nullValue());
       }
-      else
-      {
+      else {
          assertThat(actual.getGroupId(), equalTo(groupId));
       }
 
-      if (artifactId == null)
-      {
+      if (artifactId == null) {
          assertThat(actual.getArtifactId(), nullValue());
       }
-      else
-      {
+      else {
          assertThat(actual.getArtifactId(), equalTo(artifactId));
       }
 
-      if (version == null)
-      {
+      if (version == null) {
          assertThat(actual.getVersion(), nullValue());
       }
-      else
-      {
+      else {
          assertThat(actual.getVersion(), equalTo(version));
       }
 
-      if (type == null)
-      {
+      if (type == null) {
          assertThat(actual.getType(), equalTo("jar"));
       }
-      else
-      {
+      else {
          assertThat(actual.getType(), equalTo(type));
       }
 

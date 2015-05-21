@@ -61,8 +61,7 @@ import org.sourcepit.tpmp.resolver.tycho.TychoSourceIUResolver.InstallableUnitDA
 @Named("per-session")
 public class TychoSessionTargetPlatformResolver extends AbstractTychoTargetPlatformResolver
    implements
-      TargetPlatformResolver
-{
+      TargetPlatformResolver {
    @Inject
    private ExecutionEnvironmentSelector eeSelector;
 
@@ -70,15 +69,13 @@ public class TychoSessionTargetPlatformResolver extends AbstractTychoTargetPlatf
    private Logger logger;
 
    @Override
-   public boolean isRelyingOnCachedFiles()
-   {
+   public boolean isRelyingOnCachedFiles() {
       return false;
    }
 
    @Override
    public void resolve(MavenSession session, File platformDir, boolean includeSource, boolean forceUpdate,
-      TargetPlatformConfigurationHandler configHandler, TargetPlatformResolutionHandler resolutionHandler)
-   {
+      TargetPlatformConfigurationHandler configHandler, TargetPlatformResolutionHandler resolutionHandler) {
       final TargetPlatformConfiguration aggregatedConfiguration = new TargetPlatformConfiguration();
       final LinkedHashSet<String> explodedBundles = new LinkedHashSet<String>();
       final LinkedHashSet<Dependency> frameworkExtensions = new LinkedHashSet<Dependency>();
@@ -100,22 +97,18 @@ public class TychoSessionTargetPlatformResolver extends AbstractTychoTargetPlatf
    }
 
    private void handleConfiguration(final TargetPlatformConfiguration aggregatedConfiguration,
-      TargetPlatformConfigurationHandler configHandler)
-   {
-      for (TargetEnvironment te : aggregatedConfiguration.getEnvironments())
-      {
+      TargetPlatformConfigurationHandler configHandler) {
+      for (TargetEnvironment te : aggregatedConfiguration.getEnvironments()) {
          configHandler.handleTargetEnvironment(te.getOs(), te.getWs(), te.getArch());
       }
 
       final String ee = aggregatedConfiguration.getExecutionEnvironment();
-      if (ee != null)
-      {
+      if (ee != null) {
          configHandler.handleExecutionEnvironment(ee);
       }
    }
 
-   private MavenProject setupAggregatedProject(MavenSession session, TargetPlatformConfiguration aggregatedConfiguration)
-   {
+   private MavenProject setupAggregatedProject(MavenSession session, TargetPlatformConfiguration aggregatedConfiguration) {
       PropertiesMap mvnProperties = new LinkedPropertiesMap();
       mvnProperties.load(getClass().getClassLoader(), "META-INF/tpmp/maven.properties");
 
@@ -129,8 +122,7 @@ public class TychoSessionTargetPlatformResolver extends AbstractTychoTargetPlatf
 
       Model model = origin.getModel().clone();
       Build build = model.getBuild();
-      if (build.getPluginsAsMap().get(tpmpKey) == null)
-      {
+      if (build.getPluginsAsMap().get(tpmpKey) == null) {
          Plugin tpmp = new Plugin();
          tpmp.setGroupId(groupId);
          tpmp.setArtifactId(artifactId);
@@ -146,19 +138,14 @@ public class TychoSessionTargetPlatformResolver extends AbstractTychoTargetPlatf
 
       final Map<String, ArtifactRepository> artifactRepositories = new LinkedHashMap<String, ArtifactRepository>();
       final Map<String, ArtifactRepository> pluginRepositories = new LinkedHashMap<String, ArtifactRepository>();
-      for (MavenProject project : session.getProjects())
-      {
-         for (ArtifactRepository repository : project.getRemoteArtifactRepositories())
-         {
-            if (!artifactRepositories.containsKey(repository.getId()))
-            {
+      for (MavenProject project : session.getProjects()) {
+         for (ArtifactRepository repository : project.getRemoteArtifactRepositories()) {
+            if (!artifactRepositories.containsKey(repository.getId())) {
                artifactRepositories.put(repository.getId(), repository);
             }
          }
-         for (ArtifactRepository repository : project.getPluginArtifactRepositories())
-         {
-            if (!pluginRepositories.containsKey(repository.getId()))
-            {
+         for (ArtifactRepository repository : project.getPluginArtifactRepositories()) {
+            if (!pluginRepositories.containsKey(repository.getId())) {
                pluginRepositories.put(repository.getId(), repository);
             }
          }
@@ -168,8 +155,7 @@ public class TychoSessionTargetPlatformResolver extends AbstractTychoTargetPlatf
       fake.setPluginArtifactRepositories(new ArrayList<ArtifactRepository>(pluginRepositories.values()));
       fake.setManagedVersionMap(origin.getManagedVersionMap());
 
-      if (getTychoProject(fake) == null)
-      {
+      if (getTychoProject(fake) == null) {
          fake.setPackaging("eclipse-repository");
       }
 
@@ -192,22 +178,19 @@ public class TychoSessionTargetPlatformResolver extends AbstractTychoTargetPlatf
       fake.setContextValue(TychoConstants.CTX_EXECUTION_ENVIRONMENT_CONFIGURATION, eeConfiguration);
 
       final DependencyMetadata dm = new DependencyMetadata();
-      for (ReactorProject reactorProject : DefaultReactorProject.adapt(session))
-      {
+      for (ReactorProject reactorProject : DefaultReactorProject.adapt(session)) {
          mergeMetadata(dm, reactorProject, true);
          mergeMetadata(dm, reactorProject, false);
       }
 
       int i = 0;
-      for (Object object : dm.getMetadata(true))
-      {
+      for (Object object : dm.getMetadata(true)) {
          InstallableUnitDAO dao = new TychoSourceIUResolver.InstallableUnitDAO(object.getClass().getClassLoader());
          dao.setProperty(object, RepositoryLayoutHelper.PROP_CLASSIFIER, "fake_" + i);
          i++;
       }
 
-      for (Object object : dm.getMetadata(false))
-      {
+      for (Object object : dm.getMetadata(false)) {
          InstallableUnitDAO dao = new TychoSourceIUResolver.InstallableUnitDAO(object.getClass().getClassLoader());
          dao.setProperty(object, RepositoryLayoutHelper.PROP_CLASSIFIER, "fake_" + i);
          i++;
@@ -221,49 +204,40 @@ public class TychoSessionTargetPlatformResolver extends AbstractTychoTargetPlatf
       return fake;
    }
 
-   private static class DependencyMetadata implements IDependencyMetadata
-   {
+   private static class DependencyMetadata implements IDependencyMetadata {
 
       private Set<Object> metadata = new LinkedHashSet<Object>(0);
       private Set<Object> secondaryMetadata = new LinkedHashSet<Object>(0);
 
       @Override
-      public Set<Object /* IInstallableUnit */> getMetadata(boolean primary)
-      {
+      public Set<Object /* IInstallableUnit */> getMetadata(boolean primary) {
          return primary ? metadata : secondaryMetadata;
       }
 
       @Override
-      public Set<Object /* IInstallableUnit */> getMetadata()
-      {
+      public Set<Object /* IInstallableUnit */> getMetadata() {
          LinkedHashSet<Object> result = new LinkedHashSet<Object>();
          result.addAll(metadata);
          result.addAll(secondaryMetadata);
          return result;
       }
 
-      public void setMetadata(boolean primary, Collection<?> units)
-      {
-         if (primary)
-         {
+      public void setMetadata(boolean primary, Collection<?> units) {
+         if (primary) {
             metadata = new LinkedHashSet<Object>(units);
          }
-         else
-         {
+         else {
             secondaryMetadata = new LinkedHashSet<Object>(units);
          }
       }
 
    }
 
-   private void mergeMetadata(DependencyMetadata dm, ReactorProject reactorProject, boolean primary)
-   {
+   private void mergeMetadata(DependencyMetadata dm, ReactorProject reactorProject, boolean primary) {
       Set<?> dependencyMetadata = reactorProject.getDependencyMetadata(primary);
-      if (dependencyMetadata != null && !dependencyMetadata.isEmpty())
-      {
+      if (dependencyMetadata != null && !dependencyMetadata.isEmpty()) {
          Set<Object> merged = dm.getMetadata(primary);
-         if (merged == null)
-         {
+         if (merged == null) {
             merged = new LinkedHashSet<Object>();
          }
          merged.addAll(dependencyMetadata);
@@ -273,59 +247,49 @@ public class TychoSessionTargetPlatformResolver extends AbstractTychoTargetPlatf
 
    private void aggregateTargetPlatformConfigurations(MavenSession session,
       final TargetPlatformConfiguration aggregatedPlatform, final LinkedHashSet<Dependency> frameworkExtensions,
-      LinkedHashSet<String> explodedBundles)
-   {
+      LinkedHashSet<String> explodedBundles) {
       final LinkedHashSet<TargetEnvironment> environments = new LinkedHashSet<TargetEnvironment>();
       final LinkedHashSet<String> executionEnvironments = new LinkedHashSet<String>();
       final LinkedHashSet<ArtifactKey> requirements = new LinkedHashSet<ArtifactKey>();
       final LinkedHashSet<Dependency> dependencies = new LinkedHashSet<Dependency>();
-      for (MavenProject project : session.getProjects())
-      {
+      for (MavenProject project : session.getProjects()) {
          final TychoProject tychoProject = getTychoProject(project);
-         if (tychoProject != null)
-         {
+         if (tychoProject != null) {
             final TargetPlatformConfiguration configuration = getTargetPlatformConfiguration(session, project);
             environments.addAll(configuration.getEnvironments());
 
             final String executionEnvironment = configuration.getExecutionEnvironment();
-            if (executionEnvironment != null)
-            {
+            if (executionEnvironment != null) {
                executionEnvironments.add(executionEnvironment);
             }
 
             final Boolean allow = aggregatedPlatform.getAllowConflictingDependencies();
-            if (allow == null || allow.booleanValue() == false)
-            {
+            if (allow == null || allow.booleanValue() == false) {
                aggregatedPlatform.setAllowConflictingDependencies(configuration.getAllowConflictingDependencies());
             }
 
             final boolean implicitTargetEnvironment = aggregatedPlatform.isImplicitTargetEnvironment();
-            if (implicitTargetEnvironment)
-            {
+            if (implicitTargetEnvironment) {
                aggregatedPlatform.setImplicitTargetEnvironment(configuration.isImplicitTargetEnvironment());
             }
-            
+
             final boolean resolveWithEEConstraints = aggregatedPlatform.isResolveWithEEConstraints();
-            if (resolveWithEEConstraints)
-            {
+            if (resolveWithEEConstraints) {
                aggregatedPlatform.setResolveWithEEContraints(configuration.isResolveWithEEConstraints());
             }
 
             final boolean includePackedArtifacts = aggregatedPlatform.isIncludePackedArtifacts();
-            if (!includePackedArtifacts)
-            {
+            if (!includePackedArtifacts) {
                aggregatedPlatform.setIncludePackedArtifacts(configuration.isIncludePackedArtifacts());
             }
 
             final String pomDependencies = aggregatedPlatform.getPomDependencies();
-            if (pomDependencies == null)
-            {
+            if (pomDependencies == null) {
                aggregatedPlatform.setPomDependencies(configuration.getPomDependencies());
             }
 
             final String targetPlatformResolver = aggregatedPlatform.getTargetPlatformResolver();
-            if (targetPlatformResolver == null)
-            {
+            if (targetPlatformResolver == null) {
                aggregatedPlatform.setResolver(configuration.getTargetPlatformResolver());
             }
 
@@ -333,10 +297,8 @@ public class TychoSessionTargetPlatformResolver extends AbstractTychoTargetPlatf
 
             aggregatedPlatform.getExtraRequirements().addAll(configuration.getExtraRequirements());
 
-            final TychoSurefirePluginConfiguration surefirePluginConfiguration = new TychoSurefirePluginConfigurationReader()
-               .read(project);
-            if (surefirePluginConfiguration != null)
-            {
+            final TychoSurefirePluginConfiguration surefirePluginConfiguration = new TychoSurefirePluginConfigurationReader().read(project);
+            if (surefirePluginConfiguration != null) {
                dependencies.addAll(surefirePluginConfiguration.getDependencies());
                explodedBundles.addAll(surefirePluginConfiguration.getExplodedBundles());
                frameworkExtensions.addAll(surefirePluginConfiguration.getFrameworkExtensions());
@@ -345,13 +307,11 @@ public class TychoSessionTargetPlatformResolver extends AbstractTychoTargetPlatf
       }
 
       aggregatedPlatform.getEnvironments().addAll(environments);
-      if (!executionEnvironments.isEmpty())
-      {
+      if (!executionEnvironments.isEmpty()) {
          aggregatedPlatform.setExecutionEnvironment(eeSelector.select(executionEnvironments));
       }
 
-      for (ArtifactKey requirement : requirements)
-      {
+      for (ArtifactKey requirement : requirements) {
          Dependency dependency = new Dependency();
          dependency.setArtifactId(requirement.getId());
          dependency.setVersion(requirement.getVersion());

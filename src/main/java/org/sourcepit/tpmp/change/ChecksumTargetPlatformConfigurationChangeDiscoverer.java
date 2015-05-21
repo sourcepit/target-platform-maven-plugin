@@ -52,31 +52,27 @@ import org.sourcepit.common.utils.props.PropertiesMap;
 import org.sourcepit.tpmp.ToolUtils;
 
 @Named
-public class ChecksumTargetPlatformConfigurationChangeDiscoverer implements TargetPlatformConfigurationChangeDiscoverer
-{
+public class ChecksumTargetPlatformConfigurationChangeDiscoverer implements TargetPlatformConfigurationChangeDiscoverer {
    private final CharsetDetector charsetDetector;
 
    private final Map<String, TargetPlatformConfigurationFilesDiscoverer> configFilesDiscovererMap;
 
    @Inject
    public ChecksumTargetPlatformConfigurationChangeDiscoverer(CharsetDetector charsetDetector,
-      Map<String, TargetPlatformConfigurationFilesDiscoverer> configFilesDiscovererMap)
-   {
+      Map<String, TargetPlatformConfigurationFilesDiscoverer> configFilesDiscovererMap) {
       this.charsetDetector = charsetDetector;
       this.configFilesDiscovererMap = configFilesDiscovererMap;
    }
 
    @Override
-   public boolean hasTargetPlatformConfigurationChanged(File statusCacheDir, MavenSession session, MavenProject project)
-   {
+   public boolean hasTargetPlatformConfigurationChanged(File statusCacheDir, MavenSession session, MavenProject project) {
       // always update project checksums
       // get last project checksum
       final String lastChecksum = getProjectChecksum(statusCacheDir, project);
       // compute new project checksum
       final String newChecksum = computeProjectChecksum(statusCacheDir, session, project);
       // compare
-      if (lastChecksum == null || !newChecksum.equals(lastChecksum))
-      {
+      if (lastChecksum == null || !newChecksum.equals(lastChecksum)) {
          // persist new checksum if changed
          setProjectChecksum(statusCacheDir, project, newChecksum);
          return true;
@@ -86,26 +82,22 @@ public class ChecksumTargetPlatformConfigurationChangeDiscoverer implements Targ
    }
 
    @Override
-   public void clearTargetPlatformConfigurationStausCache(File statusCacheDir, MavenProject project)
-   {
+   public void clearTargetPlatformConfigurationStausCache(File statusCacheDir, MavenProject project) {
       final File checksumFile = new File(statusCacheDir, "project-status.properties");
       final PropertiesMap properties = new LinkedPropertiesMap();
-      if (checksumFile.exists())
-      {
+      if (checksumFile.exists()) {
          properties.load(checksumFile);
          properties.remove(project.getId());
          properties.store(checksumFile);
       }
    }
 
-   private String computeProjectChecksum(File statusCacheDir, MavenSession session, MavenProject project)
-   {
+   private String computeProjectChecksum(File statusCacheDir, MavenSession session, MavenProject project) {
       final List<MavenProject> projects = new ArrayList<MavenProject>();
       projects.add(project);
 
       MavenProject parent = project.getParent();
-      while (parent != null)
-      {
+      while (parent != null) {
          projects.add(parent);
          parent = parent.getParent();
       }
@@ -113,20 +105,16 @@ public class ChecksumTargetPlatformConfigurationChangeDiscoverer implements Targ
       return computeProjectsChecksum(statusCacheDir, session, projects);
    }
 
-   private String getDefaultEncoding(MavenProject project)
-   {
+   private String getDefaultEncoding(MavenProject project) {
       return project.getProperties().getProperty("project.build.sourceEncoding", Charset.defaultCharset().name());
    }
 
-   private String computeProjectsChecksum(File statusCacheDir, MavenSession session, List<MavenProject> projects)
-   {
+   private String computeProjectsChecksum(File statusCacheDir, MavenSession session, List<MavenProject> projects) {
       final StringBuilder sb = new StringBuilder();
-      for (final MavenProject project : projects)
-      {
+      for (final MavenProject project : projects) {
          final List<File> files = getTPFilesDiscoverer(session, project).getTargetPlatformConfigurationFiles(session,
             project);
-         for (final File file : files)
-         {
+         for (final File file : files) {
             final String encoding = detectEncoding(project, file);
             final String hash = calculateHash(file, encoding);
             final String path = PathUtils.getRelativePath(file, new File("").getAbsoluteFile(), "/");
@@ -137,43 +125,34 @@ public class ChecksumTargetPlatformConfigurationChangeDiscoverer implements Targ
          }
       }
 
-      try
-      {
+      try {
          return calculateHash(sb.toString().getBytes("ASCII"), "ASCII");
       }
-      catch (UnsupportedEncodingException e)
-      {
+      catch (UnsupportedEncodingException e) {
          throw Exceptions.pipe(e);
       }
    }
 
-   private TargetPlatformConfigurationFilesDiscoverer getTPFilesDiscoverer(MavenSession session, MavenProject project)
-   {
+   private TargetPlatformConfigurationFilesDiscoverer getTPFilesDiscoverer(MavenSession session, MavenProject project) {
       final String tool = ToolUtils.getTool(session, project);
-      if (tool == null)
-      {
+      if (tool == null) {
          throw new IllegalStateException("Property tpmp.tool is not set");
       }
       return configFilesDiscovererMap.get(tool);
    }
 
-   private void dump(File statusCacheDir, String path, String encoding, String hash)
-   {
+   private void dump(File statusCacheDir, String path, String encoding, String hash) {
       final File checksumFile = new File(statusCacheDir, "dump.properties");
       final PropertiesMap properties = new LinkedPropertiesMap();
-      if (checksumFile.exists())
-      {
+      if (checksumFile.exists()) {
          properties.load(checksumFile);
       }
-      else
-      {
+      else {
          checksumFile.getParentFile().mkdirs();
-         try
-         {
+         try {
             checksumFile.createNewFile();
          }
-         catch (IOException e)
-         {
+         catch (IOException e) {
             throw Exceptions.pipe(e);
          }
       }
@@ -181,15 +160,12 @@ public class ChecksumTargetPlatformConfigurationChangeDiscoverer implements Targ
       properties.store(checksumFile);
    }
 
-   private String detectEncoding(final MavenProject project, final File file)
-   {
+   private String detectEncoding(final MavenProject project, final File file) {
       final CharsetDetectionResult[] result = new CharsetDetectionResult[1];
 
-      new IOOperation<InputStream>(fileIn(file))
-      {
+      new IOOperation<InputStream>(fileIn(file)) {
          @Override
-         protected void run(InputStream openResource) throws IOException
-         {
+         protected void run(InputStream openResource) throws IOException {
             result[0] = charsetDetector.detect(file.getName(), openResource, getDefaultEncoding(project));
          }
       }.run();
@@ -197,59 +173,48 @@ public class ChecksumTargetPlatformConfigurationChangeDiscoverer implements Targ
       return result[0].getRecommendedCharset().name();
    }
 
-   private static String calculateHash(File file, String encoding)
-   {
+   private static String calculateHash(File file, String encoding) {
       final MessageDigest sha1;
-      try
-      {
+      try {
          sha1 = MessageDigest.getInstance("SHA1");
       }
-      catch (NoSuchAlgorithmException e)
-      {
+      catch (NoSuchAlgorithmException e) {
          throw Exceptions.pipe(e);
       }
 
       return calculateHash(sha1, buffIn(fileIn(file)), encoding);
    }
 
-   private static String calculateHash(byte[] bytes, String encoding)
-   {
+   private static String calculateHash(byte[] bytes, String encoding) {
       final MessageDigest sha1;
-      try
-      {
+      try {
          sha1 = MessageDigest.getInstance("SHA1");
       }
-      catch (NoSuchAlgorithmException e)
-      {
+      catch (NoSuchAlgorithmException e) {
          throw Exceptions.pipe(e);
       }
       return calculateHash(sha1, buffIn(byteIn(bytes)), encoding);
    }
 
    private static String calculateHash(final MessageDigest algorithm, final IOHandle<? extends InputStream> ioResource,
-      final String encoding)
-   {
+      final String encoding) {
       Reader reader = null;
       InputStream inputStream = null;
-      try
-      {
+      try {
          inputStream = ioResource.open();
          reader = new WhitespaceFilterReader(new InputStreamReader(inputStream, encoding));
 
          int ch = reader.read();
-         while (ch > -1)
-         {
+         while (ch > -1) {
             algorithm.update((byte) ((ch & 0xFF00) >> 8));
             algorithm.update((byte) (ch & 0x00FF));
             ch = reader.read();
          }
       }
-      catch (IOException e)
-      {
+      catch (IOException e) {
          throw Exceptions.pipe(e);
       }
-      finally
-      {
+      finally {
          IOUtils.closeQuietly(reader);
       }
 
@@ -259,25 +224,19 @@ public class ChecksumTargetPlatformConfigurationChangeDiscoverer implements Targ
       return byteArray2Hex(hash);
    }
 
-   private static final class WhitespaceFilterReader extends FilterReader
-   {
-      private WhitespaceFilterReader(Reader in)
-      {
+   private static final class WhitespaceFilterReader extends FilterReader {
+      private WhitespaceFilterReader(Reader in) {
          super(in);
       }
 
       @Override
-      public long skip(long n) throws IOException
-      {
-         if (n < 0L)
-         {
+      public long skip(long n) throws IOException {
+         if (n < 0L) {
             throw new IllegalArgumentException("skip value is negative");
          }
 
-         for (long i = 0; i < n; i++)
-         {
-            if (read() == -1)
-            {
+         for (long i = 0; i < n; i++) {
+            if (read() == -1) {
                return i;
             }
          }
@@ -285,19 +244,14 @@ public class ChecksumTargetPlatformConfigurationChangeDiscoverer implements Targ
       }
 
       @Override
-      public int read(char[] cbuf, int off, int len) throws IOException
-      {
-         for (int i = 0; i < len; i++)
-         {
+      public int read(char[] cbuf, int off, int len) throws IOException {
+         for (int i = 0; i < len; i++) {
             int ch = read();
-            if (ch == -1)
-            {
-               if (i == 0)
-               {
+            if (ch == -1) {
+               if (i == 0) {
                   return -1;
                }
-               else
-               {
+               else {
                   return i;
                }
             }
@@ -307,40 +261,32 @@ public class ChecksumTargetPlatformConfigurationChangeDiscoverer implements Targ
       }
 
       @Override
-      public int read() throws IOException
-      {
+      public int read() throws IOException {
          int ch = super.read();
-         while (Character.isWhitespace(ch))
-         {
+         while (Character.isWhitespace(ch)) {
             ch = super.read();
          }
          return ch;
       }
    }
 
-   private static String byteArray2Hex(byte[] hash)
-   {
+   private static String byteArray2Hex(byte[] hash) {
       Formatter formatter = null;
-      try
-      {
+      try {
          formatter = new Formatter();
-         for (byte b : hash)
-         {
+         for (byte b : hash) {
             formatter.format("%02x", Byte.valueOf(b));
          }
          return formatter.toString();
       }
-      finally
-      {
+      finally {
          IOUtils.closeQuietly(formatter);
       }
    }
 
-   private String getProjectChecksum(File statusCacheDir, MavenProject project)
-   {
+   private String getProjectChecksum(File statusCacheDir, MavenProject project) {
       final File checksumFile = new File(statusCacheDir, "project-status.properties");
-      if (checksumFile.exists())
-      {
+      if (checksumFile.exists()) {
          final PropertiesMap properties = new LinkedPropertiesMap();
          properties.load(checksumFile);
          return properties.get(project.getId());
@@ -348,23 +294,18 @@ public class ChecksumTargetPlatformConfigurationChangeDiscoverer implements Targ
       return null;
    }
 
-   private void setProjectChecksum(File statusCacheDir, MavenProject project, String checksum)
-   {
+   private void setProjectChecksum(File statusCacheDir, MavenProject project, String checksum) {
       final File checksumFile = new File(statusCacheDir, "project-status.properties");
       final PropertiesMap properties = new LinkedPropertiesMap();
-      if (checksumFile.exists())
-      {
+      if (checksumFile.exists()) {
          properties.load(checksumFile);
       }
-      else
-      {
+      else {
          checksumFile.getParentFile().mkdirs();
-         try
-         {
+         try {
             checksumFile.createNewFile();
          }
-         catch (IOException e)
-         {
+         catch (IOException e) {
             throw Exceptions.pipe(e);
          }
       }

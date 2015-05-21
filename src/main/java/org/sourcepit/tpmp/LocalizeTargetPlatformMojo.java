@@ -33,11 +33,9 @@ import org.sourcepit.common.utils.zip.ZipProcessor;
  * @author Bernd Vogt <bernd.vogt@sourcepit.org>
  */
 @Mojo(name = "localize", requiresProject = true, aggregator = true)
-public class LocalizeTargetPlatformMojo extends AbstractTargetPlatformMojo
-{
+public class LocalizeTargetPlatformMojo extends AbstractTargetPlatformMojo {
    @Override
-   protected void doExecute()
-   {
+   protected void doExecute() {
       final MavenProject project = getSession().getCurrentProject();
 
       final File platformDir = downloadTargetPlatformOnDemand(project);
@@ -45,18 +43,15 @@ public class LocalizeTargetPlatformMojo extends AbstractTargetPlatformMojo
       updateTargetPlatform(project, platformDir);
    }
 
-   protected File downloadTargetPlatformOnDemand(MavenProject project)
-   {
+   protected File downloadTargetPlatformOnDemand(MavenProject project) {
       final File platformDir = getPlatformDir(project);
-      if (!platformDir.exists() && getResolver().isRelyingOnCachedFiles())
-      {
+      if (!platformDir.exists() && getResolver().isRelyingOnCachedFiles()) {
          download(getSession(), project, platformDir.getParentFile());
       }
       return platformDir;
    }
 
-   private void download(MavenSession session, MavenProject project, File parentDir)
-   {
+   private void download(MavenSession session, MavenProject project, File parentDir) {
       final Artifact platformArtifact = createPlatformArtifact(project);
 
       final ArtifactResolutionRequest request = new ArtifactResolutionRequest();
@@ -70,16 +65,13 @@ public class LocalizeTargetPlatformMojo extends AbstractTargetPlatformMojo
 
       repositorySystem.resolve(request);
 
-      if (platformArtifact.getFile().exists())
-      {
+      if (platformArtifact.getFile().exists()) {
          final ZipProcessingRequest unzipRequest = ZipProcessingRequest.newUnzipRequest(platformArtifact.getFile(),
             parentDir);
-         try
-         {
+         try {
             new ZipProcessor().process(unzipRequest);
          }
-         catch (IOException e)
-         {
+         catch (IOException e) {
             throw Exceptions.pipe(e);
          }
       }

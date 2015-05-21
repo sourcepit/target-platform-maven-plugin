@@ -37,44 +37,35 @@ import org.eclipse.tycho.model.UpdateSite;
 import org.sourcepit.tpmp.change.TargetPlatformConfigurationFilesDiscoverer;
 
 @Named("Tycho")
-public class TychoTargetPlatformConfigurationFilesDiscoverer implements TargetPlatformConfigurationFilesDiscoverer
-{
+public class TychoTargetPlatformConfigurationFilesDiscoverer implements TargetPlatformConfigurationFilesDiscoverer {
    private final Map<String, TychoProject> projectTypes;
 
    @Inject
-   public TychoTargetPlatformConfigurationFilesDiscoverer(Map<String, TychoProject> projectTypes)
-   {
+   public TychoTargetPlatformConfigurationFilesDiscoverer(Map<String, TychoProject> projectTypes) {
       this.projectTypes = projectTypes;
    }
 
    @Override
-   public List<File> getTargetPlatformConfigurationFiles(MavenSession session, MavenProject project)
-   {
+   public List<File> getTargetPlatformConfigurationFiles(MavenSession session, MavenProject project) {
       final List<File> files = new ArrayList<File>();
       files.add(project.getFile());
 
       final TychoProject tychoProject = projectTypes.get(project.getPackaging());
-      if (tychoProject != null)
-      {
-         if (tychoProject instanceof OsgiBundleProject)
-         {
+      if (tychoProject != null) {
+         if (tychoProject instanceof OsgiBundleProject) {
             files.add(new File(project.getBasedir(), "META-INF/MANIFEST.MF"));
          }
-         else if (tychoProject instanceof EclipseApplicationProject)
-         {
+         else if (tychoProject instanceof EclipseApplicationProject) {
             files.add(new File(project.getBasedir(), project.getArtifactId() + ".product"));
          }
-         else if (tychoProject instanceof EclipseFeatureProject)
-         {
+         else if (tychoProject instanceof EclipseFeatureProject) {
             files.add(new File(project.getBasedir(), Feature.FEATURE_XML));
          }
-         else if (tychoProject instanceof EclipseRepositoryProject)
-         {
+         else if (tychoProject instanceof EclipseRepositoryProject) {
             files.addAll(/* ((EclipseRepositoryProject) tychoProject). */getCategoryFiles(project));
             files.addAll(((EclipseRepositoryProject) tychoProject).getProductFiles(project));
          }
-         else if (tychoProject instanceof UpdateSiteProject)
-         {
+         else if (tychoProject instanceof UpdateSiteProject) {
             files.add(new File(project.getBasedir(), UpdateSite.SITE_XML));
          }
       }
@@ -82,12 +73,10 @@ public class TychoTargetPlatformConfigurationFilesDiscoverer implements TargetPl
       return files;
    }
 
-   private List<File> getCategoryFiles(MavenProject project)
-   {
+   private List<File> getCategoryFiles(MavenProject project) {
       List<File> res = new ArrayList<File>();
       File categoryFile = new File(project.getBasedir(), "category.xml");
-      if (categoryFile.exists())
-      {
+      if (categoryFile.exists()) {
          res.add(categoryFile);
       }
       return res;

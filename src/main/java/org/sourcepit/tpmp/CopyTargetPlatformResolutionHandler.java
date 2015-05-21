@@ -35,8 +35,7 @@ import org.sourcepit.tpmp.resolver.TargetPlatformResolutionHandler;
 public class CopyTargetPlatformResolutionHandler
    implements
       TargetPlatformResolutionHandler,
-      TargetPlatformConfigurationHandler
-{
+      TargetPlatformConfigurationHandler {
    private final Collection<String> executionEnvironments = new LinkedHashSet<String>();
    private final Collection<TargetEnvironment> targetEnvironments = new LinkedHashSet<TargetEnvironment>();
 
@@ -44,158 +43,125 @@ public class CopyTargetPlatformResolutionHandler
    private final File featuresDir;
    private final File pluginsDir;
 
-   public CopyTargetPlatformResolutionHandler(File targetDir)
-   {
+   public CopyTargetPlatformResolutionHandler(File targetDir) {
       this.platformDir = targetDir;
       featuresDir = new File(targetDir, "features");
       pluginsDir = new File(targetDir, "plugins");
    }
 
-   public File getPlatformDir()
-   {
+   public File getPlatformDir() {
       return platformDir;
    }
 
-   public File getFeaturesDir()
-   {
+   public File getFeaturesDir() {
       return featuresDir;
    }
 
-   public File getPluginsDir()
-   {
+   public File getPluginsDir() {
       return pluginsDir;
    }
 
-   public Collection<TargetEnvironment> getTargetEnvironments()
-   {
+   public Collection<TargetEnvironment> getTargetEnvironments() {
       return targetEnvironments;
    }
 
-   public Collection<String> getExecutionEnvironments()
-   {
+   public Collection<String> getExecutionEnvironments() {
       return executionEnvironments;
    }
 
    @Override
-   public void handleTargetEnvironment(@NotNull String os, @NotNull String ws, @NotNull String arch)
-   {
+   public void handleTargetEnvironment(@NotNull String os, @NotNull String ws, @NotNull String arch) {
       targetEnvironments.add(new TargetEnvironment(os, ws, arch));
    }
 
    @Override
-   public void handleExecutionEnvironment(@NotNull String ee)
-   {
+   public void handleExecutionEnvironment(@NotNull String ee) {
       executionEnvironments.add(ee);
    }
 
    @Override
    public void handleFeature(@NotNull String id, @NotNull String version, @NotNull File location,
-      MavenProject mavenProject)
-   {
-      if (mavenProject == null)
-      {
+      MavenProject mavenProject) {
+      if (mavenProject == null) {
          processFeature(id, version, location);
       }
    }
 
    @Override
    public void handlePlugin(@NotNull String id, @NotNull String version, @NotNull File location, boolean unpack,
-      MavenProject mavenProject)
-   {
-      if (mavenProject == null)
-      {
+      MavenProject mavenProject) {
+      if (mavenProject == null) {
          processPlugin(id, version, location, unpack);
       }
    }
 
-   private void processPlugin(String id, String version, File location, boolean unpack)
-   {
+   private void processPlugin(String id, String version, File location, boolean unpack) {
       final File pluginDir = newPluginDir(id, version);
       final File pluginJar = newPluginJar(id, version);
 
-      try
-      {
-         if (location.isFile())
-         {
-            if (unpack)
-            {
-               if (pluginJar.exists())
-               {
+      try {
+         if (location.isFile()) {
+            if (unpack) {
+               if (pluginJar.exists()) {
                   deleteFileOrDirectory(pluginJar);
                }
-               if (!pluginDir.exists())
-               {
+               if (!pluginDir.exists()) {
                   unpack(location, pluginDir);
                }
             }
-            else
-            {
-               if (!pluginJar.exists() && !pluginDir.exists())
-               {
+            else {
+               if (!pluginJar.exists() && !pluginDir.exists()) {
                   FileUtils.copyFile(location, pluginJar);
                }
             }
          }
-         else
-         {
-            if (pluginJar.exists())
-            {
+         else {
+            if (pluginJar.exists()) {
                deleteFileOrDirectory(pluginJar);
             }
-            if (!pluginDir.exists())
-            {
+            if (!pluginDir.exists()) {
                FileUtils.copyDirectory(location, pluginDir);
             }
          }
       }
-      catch (IOException e)
-      {
+      catch (IOException e) {
          throw Exceptions.pipe(e);
       }
    }
 
-   private void processFeature(String id, String version, File location)
-   {
+   private void processFeature(String id, String version, File location) {
       final File featureDir = newFeatureDir(id, version);
-      if (featureDir.exists())
-      {
+      if (featureDir.exists()) {
          return;
       }
 
-      try
-      {
+      try {
          unpack(location, featureDir);
       }
-      catch (IOException e)
-      {
+      catch (IOException e) {
          throw Exceptions.pipe(e);
       }
 
    }
 
-   private void unpack(File srcFile, final File destDir) throws IOException
-   {
+   private void unpack(File srcFile, final File destDir) throws IOException {
       final ZipProcessingRequest request = ZipProcessingRequest.newUnzipRequest(srcFile, destDir);
       new ZipProcessor().process(request);
    }
 
-   private File newFeatureDir(String id, String version)
-   {
+   private File newFeatureDir(String id, String version) {
       return new File(featuresDir, getVersionedid(id, version));
    }
 
-   private File newPluginDir(String id, String version)
-   {
+   private File newPluginDir(String id, String version) {
       return new File(pluginsDir, getVersionedid(id, version));
    }
 
-   private File newPluginJar(String id, String version)
-   {
+   private File newPluginJar(String id, String version) {
       return new File(pluginsDir, getVersionedid(id, version) + ".jar");
    }
 
-   private String getVersionedid(String id, String version)
-   {
+   private String getVersionedid(String id, String version) {
       return id + "_" + version;
    }
 }

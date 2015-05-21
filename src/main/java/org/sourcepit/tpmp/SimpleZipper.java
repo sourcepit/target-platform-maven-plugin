@@ -33,57 +33,42 @@ import org.sourcepit.common.utils.io.IOOperation;
 import org.sourcepit.common.utils.lang.Exceptions;
 import org.sourcepit.common.utils.path.PathUtils;
 
-public class SimpleZipper
-{
-   public void zip(final File platformDir, File platformZipFile, final String pathPrefix)
-   {
-      new IOOperation<ZipOutputStream>(zipOut(fileOut(platformZipFile, true)))
-      {
+public class SimpleZipper {
+   public void zip(final File platformDir, File platformZipFile, final String pathPrefix) {
+      new IOOperation<ZipOutputStream>(zipOut(fileOut(platformZipFile, true))) {
          @Override
-         protected void run(final ZipOutputStream zipOut) throws IOException
-         {
-            org.sourcepit.common.utils.file.FileUtils.accept(platformDir, new FileVisitor()
-            {
+         protected void run(final ZipOutputStream zipOut) throws IOException {
+            org.sourcepit.common.utils.file.FileUtils.accept(platformDir, new FileVisitor() {
                @Override
-               public boolean visit(File file)
-               {
-                  if (!file.equals(platformDir))
-                  {
-                     try
-                     {
+               public boolean visit(File file) {
+                  if (!file.equals(platformDir)) {
+                     try {
                         String path = PathUtils.getRelativePath(file, platformDir, "/");
-                        if (pathPrefix != null)
-                        {
+                        if (pathPrefix != null) {
                            path = pathPrefix + "/" + path;
                         }
                         pack(zipOut, file, path);
                      }
-                     catch (IOException e)
-                     {
+                     catch (IOException e) {
                         throw Exceptions.pipe(e);
                      }
                   }
                   return true;
                }
 
-               private void pack(final ZipOutputStream zipOut, File file, final String path) throws IOException
-               {
-                  if (file.isDirectory())
-                  {
+               private void pack(final ZipOutputStream zipOut, File file, final String path) throws IOException {
+                  if (file.isDirectory()) {
                      ZipEntry entry = new ZipEntry(path + "/");
                      zipOut.putNextEntry(entry);
                      zipOut.closeEntry();
                   }
-                  else
-                  {
+                  else {
                      ZipEntry entry = new ZipEntry(path);
                      entry.setSize(file.length());
                      zipOut.putNextEntry(entry);
-                     new IOOperation<InputStream>(buffIn(fileIn(file)))
-                     {
+                     new IOOperation<InputStream>(buffIn(fileIn(file))) {
                         @Override
-                        protected void run(InputStream openFile) throws IOException
-                        {
+                        protected void run(InputStream openFile) throws IOException {
                            IOUtils.copy(openFile, zipOut);
                         }
                      }.run();

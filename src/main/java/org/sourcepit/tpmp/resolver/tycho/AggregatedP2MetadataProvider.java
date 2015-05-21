@@ -29,15 +29,12 @@ import org.eclipse.tycho.p2.metadata.IDependencyMetadata;
 import org.eclipse.tycho.p2.resolver.P2MetadataProvider;
 
 @Named
-public class AggregatedP2MetadataProvider implements P2MetadataProvider
-{
+public class AggregatedP2MetadataProvider implements P2MetadataProvider {
    @Override
    public Map<String, IDependencyMetadata> getDependencyMetadata(MavenSession session, MavenProject project,
-      List<TargetEnvironment> environments, OptionalResolutionAction optional)
-   {
+      List<TargetEnvironment> environments, OptionalResolutionAction optional) {
       @SuppressWarnings("unchecked")
-      final Map<String, IDependencyMetadata> metadata = (Map<String, IDependencyMetadata>) project
-         .getContextValue("tpmp.aggregatedMetadata");
+      final Map<String, IDependencyMetadata> metadata = (Map<String, IDependencyMetadata>) project.getContextValue("tpmp.aggregatedMetadata");
       return metadata;
    }
 

@@ -23,11 +23,9 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.ProcessingInstruction;
 
-public class TargetPlatformWriter
-{
+public class TargetPlatformWriter {
    public void write(File targetFile, String name, String location, TargetEnvironment targetEnvironment,
-      String executionEnvironment)
-   {
+      String executionEnvironment) {
       final Document doc = XmlUtils.newDocument();
 
       ProcessingInstruction pdeVersion = doc.createProcessingInstruction("pde", "version=\"3.6\"");
@@ -37,12 +35,10 @@ public class TargetPlatformWriter
       targetElem.setAttribute("name", name);
       doc.appendChild(targetElem);
 
-      if (targetEnvironment != null)
-      {
+      if (targetEnvironment != null) {
          appendTargetEnvironment(targetElem, targetEnvironment);
       }
-      if (executionEnvironment != null)
-      {
+      if (executionEnvironment != null) {
          appendExecutionEnvironment(targetElem, executionEnvironment);
       }
 
@@ -57,8 +53,7 @@ public class TargetPlatformWriter
       XmlUtils.writeXml(doc, targetFile);
    }
 
-   private void appendTargetEnvironment(Element parentElem, TargetEnvironment targetEnvironment)
-   {
+   private void appendTargetEnvironment(Element parentElem, TargetEnvironment targetEnvironment) {
       Document doc = parentElem.getOwnerDocument();
 
       Element environmentElem = doc.createElement("environment");
@@ -77,8 +72,7 @@ public class TargetPlatformWriter
       environmentElem.appendChild(archElem);
    }
 
-   private void appendExecutionEnvironment(Element parentElem, String executionEnvironment)
-   {
+   private void appendExecutionEnvironment(Element parentElem, String executionEnvironment) {
       Element jreElem = parentElem.getOwnerDocument().createElement("targetJRE");
       jreElem.setAttribute("path",
          "org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/"

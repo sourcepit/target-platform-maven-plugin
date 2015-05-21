@@ -21,8 +21,7 @@ import java.io.File;
 import org.apache.maven.execution.MavenSession;
 
 
-public interface TargetPlatformResolver
-{
+public interface TargetPlatformResolver {
    boolean isRelyingOnCachedFiles();
 
    void resolve(MavenSession session, File platformDir, boolean includeSource, boolean forceUpdate,

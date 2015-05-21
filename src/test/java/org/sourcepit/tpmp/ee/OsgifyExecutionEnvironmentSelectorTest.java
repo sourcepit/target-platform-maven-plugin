@@ -26,46 +26,38 @@ import java.util.Arrays;
 import java.util.List;
 
 import javax.inject.Inject;
-import java.lang.IllegalArgumentException;
 
 import org.eclipse.sisu.launch.InjectedTest;
 import org.junit.Test;
 
-public class OsgifyExecutionEnvironmentSelectorTest extends InjectedTest
-{
+public class OsgifyExecutionEnvironmentSelectorTest extends InjectedTest {
    @Inject
    private DefaultExecutionEnvironmentSelector selector;
 
    @Test
-   public void testNull()
-   {
-      try
-      {
+   public void testNull() {
+      try {
          selector.select(null);
          fail();
       }
-      catch (IllegalArgumentException e)
-      {
+      catch (IllegalArgumentException e) {
          // as expected
       }
    }
 
    @Test
-   public void testEmpty()
-   {
+   public void testEmpty() {
       assertThat(selector.select(new ArrayList<String>()), nullValue());
    }
 
    @Test
-   public void testUnknown()
-   {
+   public void testUnknown() {
       final List<String> ees = Arrays.asList("foo", "bar");
       assertThat(selector.select(ees), equalTo("foo"));
    }
 
    @Test
-   public void testHighestIsSelected()
-   {
+   public void testHighestIsSelected() {
       final List<String> ees = Arrays.asList("OSGi/Minimum-1.2", "foo", "CDC-1.1/Foundation-1.1", "JavaSE-1.6",
          "J2SE-1.3", "bar");
       assertThat(selector.select(ees), equalTo("JavaSE-1.6"));
