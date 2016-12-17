@@ -24,12 +24,13 @@ import javax.inject.Named;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.project.MavenProject;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sourcepit.tpmp.change.TargetPlatformConfigurationChangeDiscoverer;
 
 @Named("per-project")
 public class PerProjectTargetPlatformResolver implements TargetPlatformResolver {
-   @Inject
-   private Logger logger;
+
+   private static final Logger LOGGER = LoggerFactory.getLogger(PerProjectTargetPlatformResolver.class);
 
    @Inject
    private TargetPlatformConfigurationChangeDiscoverer changeDiscoverer;
@@ -43,7 +44,7 @@ public class PerProjectTargetPlatformResolver implements TargetPlatformResolver 
    }
 
    public Logger getLogger() {
-      return logger;
+      return LOGGER;
    }
 
    @Override
