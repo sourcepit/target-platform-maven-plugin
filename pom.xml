@@ -20,7 +20,7 @@
 	<parent>
 		<groupId>org.sourcepit</groupId>
 		<artifactId>srcpit-parent</artifactId>
-		<version>22-SNAPSHOT</version>
+		<version>23</version>
 	</parent>
 
 	<artifactId>target-platform-maven-plugin</artifactId>
@@ -57,32 +57,32 @@
 			<dependency>
 				<groupId>org.sourcepit.common</groupId>
 				<artifactId>org.sourcepit.common.utils</artifactId>
-				<version>0.17.0-SNAPSHOT</version>
+				<version>0.17.0</version>
 			</dependency>
 			<dependency>
 				<groupId>org.sourcepit.common</groupId>
 				<artifactId>org.sourcepit.common.constraints</artifactId>
-				<version>0.17.0-SNAPSHOT</version>
+				<version>0.17.0</version>
 			</dependency>
 			<dependency>
 				<groupId>org.sourcepit.common.maven</groupId>
 				<artifactId>common-maven-core</artifactId>
-				<version>0.24.0-SNAPSHOT</version>
+				<version>0.24.0</version>
 			</dependency>
 			<dependency>
 				<groupId>org.sourcepit.common</groupId>
 				<artifactId>org.sourcepit.common.manifest</artifactId>
-				<version>0.20.0-SNAPSHOT</version>
+				<version>0.20.0</version>
 			</dependency>
 			<dependency>
 				<groupId>org.sourcepit.common</groupId>
 				<artifactId>common-testing</artifactId>
-				<version>0.15.0-SNAPSHOT</version>
+				<version>0.15.0</version>
 			</dependency>
 			<dependency>
 				<groupId>org.sourcepit.osgifier</groupId>
 				<artifactId>org.sourcepit.osgifier.core</artifactId>
-				<version>0.25.0-SNAPSHOT</version>
+				<version>0.25.0</version>
 			</dependency>
 			<dependency>
 				<groupId>org.eclipse.tycho</groupId>
